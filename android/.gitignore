@@ -1,3 +1,11 @@
+# 1. Flutter/Dart - Các file tự động sinh ra khi build và chạy app
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+
+# 2. Android - Tránh xung đột cấu hình SDK và Gradle của từng máy
 gradle-wrapper.jar
 /.gradle
 /captures/
@@ -7,8 +15,41 @@ gradle-wrapper.jar
 GeneratedPluginRegistrant.java
 .cxx/
 
-# Remember to never publicly share your keystore.
-# See https://flutter.dev/to/reference-keystore
+# 3. iOS - Các file tạm của Xcode và CocoaPods
+ios/.generated/
+ios/.build/
+ios/Pods/
+ios/Runner.xcworkspace/xcuserdata/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# 4. Web - Các thư mục build cho nền tảng web
+build/web/
+
+# 5. Desktop (Windows/macOS/Linux)
+build/windows/
+build/macos/
+build/linux/
+
+# 6. IDE - Cấu hình riêng của VS Code hoặc Android Studio
+.vscode/
+.idea/
+*.iml
+*.iws
+*.out
+
+# 7. Bảo mật - TUYỆT ĐỐI KHÔNG để lộ file ký app (Keystore)
 key.properties
 **/*.keystore
 **/*.jks
+**/*.p12
+**/*.pfx
+**/*.realm
+
+# 8. Logs và file tạm của hệ thống
+*.log
+.DS_Store
+Thumbs.db
