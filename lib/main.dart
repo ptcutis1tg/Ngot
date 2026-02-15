@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
+import 'package:flutter_application_1/firstscreen/widget/addtransaction.dart';
+import 'package:flutter_application_1/firstscreen/widget/popupextension.dart';
+import 'package:flutter_application_1/models/transactionproflie.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -151,6 +154,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined), label: 'Settings'),
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 16.0, right: 16.0),
+        child: RawMaterialButton(
+          onPressed: () {
+            AddTransactionWidget(
+              onAdd: (TransactionProfile p1) {},
+            ).showFloatingOverlay(context, width: 300, height: 350);
+          },
+          fillColor: Theme.of(context).colorScheme.primary,
+          shape: const CircleBorder(),
+          elevation: 6.0,
+          constraints: const BoxConstraints.tightFor(
+            width: 64.0,
+            height: 64.0,
+          ),
+          child: const Icon(Icons.add, size: 32.0, color: Colors.white),
+        ),
       ),
     );
   }
