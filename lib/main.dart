@@ -7,10 +7,18 @@ import 'firstscreen/statistic_screen.dart';
 import 'firstscreen/wallet_screen.dart';
 import 'firstscreen/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_1/reset.dart';
+import 'package:flutter_application_1/debug.dart';
+
+// Flag để reset dữ liệu (thay đổi thành true nếu muốn reset)
+const bool RESET_APP_DATA = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await DebugHelper.printAllData();
   await initializeUserProfile();
+  // Initialize với option reset
+  await AppInitializer.initialize(resetData: RESET_APP_DATA);
   runApp(
     MultiProvider(
       providers: [
