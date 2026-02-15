@@ -17,11 +17,12 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return UserProfile(
-      name: fields[0] as String,
-      profilePicPath: fields[1] as String,
       totalBalance: fields[2] as double?,
       createdAt: fields[3] as DateTime?,
-    );
+      name: '',
+    )
+      .._name = fields[0] as String
+      .._profilePicPath = fields[1] as String?;
   }
 
   @override
@@ -29,9 +30,9 @@ class UserProfileAdapter extends TypeAdapter<UserProfile> {
     writer
       ..writeByte(4)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj._name)
       ..writeByte(1)
-      ..write(obj.profilePicPath)
+      ..write(obj._profilePicPath)
       ..writeByte(2)
       ..write(obj.totalBalance)
       ..writeByte(3)

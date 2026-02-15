@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/firstscreen/widget/dashboardscreen/userwelcome.dart';
+import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -22,26 +25,31 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Profile Section
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 25,
-                  backgroundImage:
-                      NetworkImage('https://i.pravatar.cc/150?img=11'),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Welcome back,',
-                        style: TextStyle(color: Colors.grey[600])),
-                    const Text('Alex Rivera',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
+            Consumer<UserProfileProvider>(
+              builder: (context, userProfile, _) {
+                return UserWelcome(userName: userProfile.userName);
+              },
             ),
+            //Row(s
+            //  children: [
+            //    const CircleAvatar(
+            //      radius: 25,
+            //      backgroundImage:
+            //          NetworkImage('https://i.pravatar.cc/150?img=11'),
+            //    ),
+            //    const SizedBox(width: 12),
+            //    Column(
+            //      crossAxisAlignment: CrossAxisAlignment.start,
+            //      children: [
+            //        Text('Welcome back,',
+            //            style: TextStyle(color: Colors.grey[600])),
+            //        const Text('Alex Rivera',
+            //            style: TextStyle(
+            //                fontSize: 18, fontWeight: FontWeight.bold)),
+            //      ],
+            //    ),
+            //  ],
+            //),
             const SizedBox(height: 30),
 
             // 2. Total Balance Card

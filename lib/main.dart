@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
+import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'firstscreen/statistic_screen.dart';
 import 'firstscreen/wallet_screen.dart';
 import 'firstscreen/settings_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeUserProfile();
   runApp(
-    // Sử dụng Provider để quản lý trạng thái sau này
-    ChangeNotifierProvider(
-      create: (context) => ExpenseProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (context) => UserProfileProvider()),
+      ],
       child: const DailyExpenseApp(),
     ),
   );
+}
+
+Future<void> initializeUserProfile() async {
+  final prefs = await SharedPreferences.getInstance();
+  bool userProfileExists = prefs.getBool('userProfileExists') ?? false;
+
+  if (!userProfileExists) {
+    // Tạo UserProfile lần đầu tiên
+    await prefs.setBool('userProfileExists', true);
+    // Khởi tạo dữ liệu mặc định
+    await prefs.setString('userName', '');
+    await prefs.setString('userEmail', '');
+    // Thêm các trường khác nếu cần
+  }
 }
 
 class DailyExpenseApp extends StatelessWidget {
@@ -76,6 +96,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     WalletScreen(), // Màn hình ví
     SettingsScreen(), // Màn hình cài đặt
   ];
+  @override
+  void initState() {
+    super.initState();
+    // Load profile khi app khởi động
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProfileProvider>().loadProfile();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
