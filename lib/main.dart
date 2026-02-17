@@ -1,36 +1,37 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_application_1/debug.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
+import 'package:flutter_application_1/firstscreen/settings_screen.dart';
+import 'package:flutter_application_1/firstscreen/statistic_screen.dart';
+import 'package:flutter_application_1/firstscreen/wallet_screen.dart';
 import 'package:flutter_application_1/firstscreen/widget/addtransaction.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
+import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:flutter_application_1/reset.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'firstscreen/statistic_screen.dart';
-import 'firstscreen/wallet_screen.dart';
-import 'firstscreen/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_application_1/reset.dart';
-import 'package:flutter_application_1/debug.dart';
 
-// Flag để reset dữ liệu (thay đổi thành true nếu muốn reset)
 const bool RESET_APP_DATA = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DebugHelper.printAllData();
   await initializeUserProfile();
-  // Initialize với option reset
   await AppInitializer.initialize(resetData: RESET_APP_DATA);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => TransactionProvider()),
-        ChangeNotifierProvider(create: (context) => UserProfileProvider()),
-        ChangeNotifierProvider(create: (context) => BackupProvider()),
-        ChangeNotifierProvider(create: (context) => CurrencyProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+        ChangeNotifierProvider(create: (_) => BackupProvider()),
+        ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => CurrencyProvider()),
       ],
       child: const DailyExpenseApp(),
     ),
@@ -39,17 +40,13 @@ void main() async {
 
 Future<void> initializeUserProfile() async {
   final prefs = await SharedPreferences.getInstance();
-  bool userProfileExists = prefs.getBool('userProfileExists') ?? false;
+  final exists = prefs.getBool('userProfileExists') ?? false;
+  if (exists) return;
 
-  if (!userProfileExists) {
-    // Tạo UserProfile lần đầu tiên
-    await prefs.setBool('userProfileExists', true);
-    // Khởi tạo dữ liệu mặc định
-    await prefs.setString('userName', '');
-    await prefs.setString('userEmail', '');
-    await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
-    // Thêm các trường khác nếu cần
-  }
+  await prefs.setBool('userProfileExists', true);
+  await prefs.setString('userName', '');
+  await prefs.setString('userEmail', '');
+  await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
 }
 
 class DailyExpenseApp extends StatelessWidget {
@@ -57,26 +54,21 @@ class DailyExpenseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appSettings = context.watch<AppSettingsProvider>();
+
     return MaterialApp(
       title: 'Daily Expense Diary',
       debugShowCheckedModeBanner: false,
-
-      // 1. Thiết lập Theme theo tông màu của Mockup
+      themeMode: appSettings.darkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2ECC71), // Màu xanh lá chủ đạo
+          seedColor: const Color(0xFF2ECC71),
           primary: const Color(0xFF2ECC71),
           secondary: const Color(0xFF27AE60),
           surface: Colors.white,
         ),
-
-        // 2. Thiết lập Font chữ (Sử dụng Inter hoặc Poppins cho hiện đại)
-        textTheme: GoogleFonts.interTextTheme(
-          Theme.of(context).textTheme,
-        ),
-
-        // Tùy chỉnh Appbar
+        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -88,64 +80,93 @@ class DailyExpenseApp extends StatelessWidget {
           ),
         ),
       ),
-
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2ECC71),
+          brightness: Brightness.dark,
+        ),
+        textTheme: GoogleFonts.interTextTheme(
+          ThemeData(brightness: Brightness.dark).textTheme,
+        ),
+      ),
       home: const MainNavigationScreen(),
     );
   }
 }
 
-// 3. Cấu trúc điều hướng chính (Bottom Navigation Bar)
-class MainNavigationScreen extends StatefulWidget {
+class MainNavigationScreen extends StatelessWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  Widget build(BuildContext context) {
+    return const _MainNavigationBody();
+  }
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
+class _MainNavigationBody extends StatefulWidget {
+  const _MainNavigationBody();
 
-  // Danh sách các màn hình tương ứng với Mockup
+  @override
+  State<_MainNavigationBody> createState() => _MainNavigationBodyState();
+}
+
+class _MainNavigationBodyState extends State<_MainNavigationBody> {
+  int _selectedIndex = 0;
+  late final PageController _pageController;
+
   static const List<Widget> _pages = [
-    DashboardScreen(), // Màn hình 1
-    StatisticsScreen(), // Màn hình báo cáo
-    WalletScreen(), // Màn hình ví
-    SettingsScreen(), // Màn hình cài đặt
+    DashboardScreen(),
+    StatisticsScreen(),
+    WalletScreen(),
+    SettingsScreen(),
   ];
+
   @override
   void initState() {
     super.initState();
-    // Load profile khi app khởi động
+    _pageController = PageController(initialPage: _selectedIndex);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProfileProvider>().loadProfile();
       context.read<TransactionProvider>().loadTransactions();
       context.read<BackupProvider>().loadConfig();
+      context.read<AppSettingsProvider>().loadSettings();
       context.read<CurrencyProvider>().loadCurrency();
     });
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onNavTap(int index) {
+    setState(() => _selectedIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _pages[_selectedIndex],
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.05, 0), // Trượt nhẹ từ phải sang
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            ),
-          );
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) {
+          if (_selectedIndex != index) {
+            setState(() => _selectedIndex = index);
+          }
         },
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: _onNavTap,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
@@ -153,21 +174,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         showUnselectedLabels: true,
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
+            icon: Icon(Icons.dashboard_outlined),
+            label: 'Dashboard',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart_outlined), label: 'Statistics'),
+            icon: Icon(Icons.bar_chart_outlined),
+            label: 'Statistics',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet_outlined),
-              label: 'Wallets'),
+            icon: Icon(Icons.account_balance_wallet_outlined),
+            label: 'Wallets',
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined), label: 'Settings'),
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
+          ),
         ],
       ),
-
-      // cái nút màu xanh xanh ở góc dưới bên phải
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 16.0, right: 16.0),
+        margin: const EdgeInsets.only(bottom: 16, right: 16),
         child: RawMaterialButton(
           onPressed: () {
             showDialog<void>(
@@ -175,11 +201,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               barrierDismissible: true,
               builder: (dialogContext) => Dialog(
                 backgroundColor: Colors.transparent,
-                insetPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 child: AddTransactionWidget(
-                  onAdd: (TransactionProfile p1) {
-                    context.read<TransactionProvider>().addTransaction(p1);
+                  onAdd: (TransactionProfile tx) {
+                    context.read<TransactionProvider>().addTransaction(tx);
                   },
                   onClose: () => Navigator.of(dialogContext).pop(),
                 ),
@@ -188,12 +213,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           },
           fillColor: Theme.of(context).colorScheme.primary,
           shape: const CircleBorder(),
-          elevation: 6.0,
-          constraints: const BoxConstraints.tightFor(
-            width: 64.0,
-            height: 64.0,
-          ),
-          child: const Icon(Icons.add, size: 32.0, color: Colors.white),
+          elevation: 6,
+          constraints: const BoxConstraints.tightFor(width: 64, height: 64),
+          child: const Icon(Icons.add, size: 32, color: Colors.white),
         ),
       ),
     );

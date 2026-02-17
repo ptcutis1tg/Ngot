@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class UserWelcome extends StatelessWidget {
@@ -40,11 +41,16 @@ class UserWelcome extends StatelessWidget {
     if (value.startsWith('http://') || value.startsWith('https://')) {
       return NetworkImage(value);
     }
-    if (value.isNotEmpty && File(value).existsSync()) {
+    if (value.isEmpty) {
+      return const AssetImage('assets/user/anonymous.jpg');
+    }
+    if (value.startsWith('assets/')) {
+      return AssetImage(value);
+    }
+    if (!kIsWeb) {
       return FileImage(File(value));
     }
-    return AssetImage(
-      value.isEmpty ? 'assets/user/anonymous.jpg' : value,
-    );
+    return const AssetImage('assets/user/anonymous.jpg');
   }
 }
+
