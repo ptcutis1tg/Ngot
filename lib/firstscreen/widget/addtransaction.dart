@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/firstscreen/widget/popupextension.dart';
 import '../../models/transactionproflie.dart';
 
 class AddTransactionWidget extends StatefulWidget {
   final void Function(TransactionProfile) onAdd;
-  const AddTransactionWidget({Key? key, required this.onAdd}) : super(key: key);
+  // Thêm callback để đóng overlay từ bên ngoài nếu cần
+  final VoidCallback? onClose;
+
+  const AddTransactionWidget({Key? key, required this.onAdd, this.onClose})
+      : super(key: key);
 
   @override
   State<AddTransactionWidget> createState() => _AddTransactionWidgetState();
@@ -14,6 +17,7 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   double _amount = 0;
+  bool _isExpense = true;
   DateTime _selectedDate = DateTime.now();
 
   void _submit() {
@@ -22,106 +26,114 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
       widget.onAdd(TransactionProfile(
         title: _title,
         time: _selectedDate,
-        amount: _amount,
+        amount: _isExpense ? -_amount : _amount,
       ));
-      Navigator.of(context).pop();
+      widget.onClose?.call();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black38,
-      child: Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            padding: EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Thêm giao dịch mới',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Tiêu đề'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Vui lòng nhập tiêu đề';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _title = value!.trim(),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Số tiền'),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  final amount = double.tryParse(value ?? '');
+                  if (amount == null || amount <= 0) {
+                    return 'Vui lòng nhập số tiền hợp lệ';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _amount = double.parse(value!),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<bool>(
+                value: _isExpense,
+                decoration: const InputDecoration(labelText: 'Loại giao dịch'),
+                items: const [
+                  DropdownMenuItem<bool>(
+                    value: true,
+                    child: Text('Chi tiêu'),
+                  ),
+                  DropdownMenuItem<bool>(
+                    value: false,
+                    child: Text('Thu nhập'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _isExpense = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    setState(() => _selectedDate = picked);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text('Thêm giao dịch mới',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Tiêu đề giao dịch'),
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Nhập tiêu đề' : null,
-                    onSaved: (v) => _title = v ?? '',
+                  TextButton(
+                    onPressed: widget.onClose,
+                    child: const Text('Hủy'),
                   ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Số tiền'),
-                    keyboardType: TextInputType.number,
-                    validator: (v) => v == null || double.tryParse(v) == null
-                        ? 'Nhập số tiền hợp lệ'
-                        : null,
-                    onSaved: (v) => _amount = double.tryParse(v ?? '') ?? 0,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                          'Ngày: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}'),
-                      TextButton(
-                        onPressed: () =>
-                            _DatePickerWidget(onDateSelected: (date) {
-                          setState(() {
-                            _selectedDate = date;
-                          });
-                        }).showFloatingOverlay(context,
-                                height: 350, width: 350),
-                        child: Text('Chọn ngày'),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text('Hủy'),
-                      ),
-                      SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: _submit,
-                        child: Text('Thêm'),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    child: const Text('Thêm'),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _DatePickerWidget extends StatelessWidget {
-  final void Function(DateTime) onDateSelected;
-  const _DatePickerWidget({Key? key, required this.onDateSelected})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CalendarDatePicker(
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      onDateChanged: (date) {
-        onDateSelected(date);
-        Navigator.of(context).pop();
-      },
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserProfileProvider extends ChangeNotifier {
   String _userName = '';
   String _userEmail = '';
-  String _userAvatar = 'https://i.pravatar.cc/150?img=11';
+  String _userAvatar = 'assets/user/anonymous.jpg';
 
   String get userName => _userName;
   String get userEmail => _userEmail;
@@ -15,8 +15,7 @@ class UserProfileProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _userName = prefs.getString('userName') ?? '';
     _userEmail = prefs.getString('userEmail') ?? '';
-    _userAvatar =
-        prefs.getString('userAvatar') ?? 'https://i.pravatar.cc/150?img=11';
+    _userAvatar = prefs.getString('userAvatar') ?? 'assets/user/anonymous.jpg';
     notifyListeners();
   }
 

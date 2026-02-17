@@ -3,6 +3,8 @@ import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
 import 'package:flutter_application_1/firstscreen/widget/addtransaction.dart';
 import 'package:flutter_application_1/firstscreen/widget/popupextension.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
+import 'package:flutter_application_1/providers/backup_provider.dart';
+import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +27,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (context) => TransactionProvider()),
         ChangeNotifierProvider(create: (context) => UserProfileProvider()),
+        ChangeNotifierProvider(create: (context) => BackupProvider()),
       ],
       child: const DailyExpenseApp(),
     ),
@@ -43,6 +46,7 @@ Future<void> initializeUserProfile() async {
     // Khởi tạo dữ liệu mặc định
     await prefs.setString('userName', '');
     await prefs.setString('userEmail', '');
+    await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
     // Thêm các trường khác nếu cần
   }
 }
@@ -113,6 +117,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     // Load profile khi app khởi động
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProfileProvider>().loadProfile();
+      context.read<TransactionProvider>().loadTransactions();
+      context.read<BackupProvider>().loadConfig();
     });
   }
 
@@ -155,14 +161,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               icon: Icon(Icons.settings_outlined), label: 'Settings'),
         ],
       ),
+
+      // cái nút màu xanh xanh ở góc dưới bên phải
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 16.0, right: 16.0),
         child: RawMaterialButton(
           onPressed: () {
-            AddTransactionWidget(
-              onAdd: (TransactionProfile p1) {},
-            ).showFloatingOverlay(context, width: 300, height: 350);
+            late OverlayEntry entry;
+            entry = AddTransactionWidget(
+              onAdd: (TransactionProfile p1) {
+                context.read<TransactionProvider>().addTransaction(p1);
+              },
+              onClose: () => entry.remove(),
+            ).showFloatingOverlay(
+              context,
+              width: MediaQuery.of(context).size.width * 0.9,
+            );
           },
           fillColor: Theme.of(context).colorScheme.primary,
           shape: const CircleBorder(),
@@ -177,6 +192,3 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
-
-// Lớp Provider tạm thời để tránh lỗi build
-class ExpenseProvider extends ChangeNotifier {}

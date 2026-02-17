@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/widget/dashboardscreen/userwelcome.dart';
+import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -27,46 +29,75 @@ class DashboardScreen extends StatelessWidget {
             // 1. Profile Section
             Consumer<UserProfileProvider>(
               builder: (context, userProfile, _) {
-                return UserWelcome(userName: userProfile.userName);
+                return UserWelcome(
+                  userName: userProfile.userName,
+                  userAvatar: userProfile.userAvatar,
+                );
               },
             ),
             const SizedBox(height: 30),
 
             // 2. Total Balance Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  )
-                ],
-              ),
-              child: Column(
-                children: [
-                  Text('Total Balance',
-                      style: TextStyle(color: Colors.grey[500])),
-                  const SizedBox(height: 8),
-                  const Text('\$12,450.00',
-                      style:
-                          TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildIncomeExpense(Icons.arrow_upward, 'Income',
-                          '+\$3,200.00', const Color(0xFF2ECC71)),
-                      _buildIncomeExpense(Icons.arrow_downward, 'Expenses',
-                          '-\$1,150.00', const Color(0xFFE74C3C)),
+            Consumer<TransactionProvider>(
+              builder: (context, transactionProvider, _) {
+                final income = transactionProvider.transactions
+                    .where((t) => t.amount > 0)
+                    .fold<double>(0, (sum, t) => sum + t.amount);
+                final expense = transactionProvider.transactions
+                    .where((t) => t.amount < 0)
+                    .fold<double>(0, (sum, t) => sum + t.amount.abs());
+                final currencyFormat = NumberFormat.currency(
+                  locale: 'en_US',
+                  symbol: '\$',
+                  decimalDigits: 2,
+                );
+
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      )
                     ],
                   ),
-                ],
-              ),
+                  child: Column(
+                    children: [
+                      Text('Total Balance',
+                          style: TextStyle(color: Colors.grey[500])),
+                      const SizedBox(height: 8),
+                      Text(
+                        currencyFormat.format(transactionProvider.totalBalance),
+                        style: const TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildIncomeExpense(
+                            Icons.arrow_upward,
+                            'Income',
+                            '+${currencyFormat.format(income)}',
+                            const Color(0xFF2ECC71),
+                          ),
+                          _buildIncomeExpense(
+                            Icons.arrow_downward,
+                            'Expenses',
+                            '-${currencyFormat.format(expense)}',
+                            const Color(0xFFE74C3C),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 30),
 
@@ -85,12 +116,48 @@ class DashboardScreen extends StatelessWidget {
             ),
 
             // 4. Transaction List
-            _buildTransactionItem(Icons.coffee, 'Starbucks Coffee',
-                'Today, 09:41 AM', '-\$5.50', Colors.orange),
-            _buildTransactionItem(Icons.payments, 'Monthly Salary',
-                'Yesterday, 05:00 PM', '+\$3,200.00', Colors.green),
-            _buildTransactionItem(Icons.directions_car, 'Uber Ride',
-                'May 21, 2024', '-\$12.00', Colors.blue),
+            Consumer<TransactionProvider>(
+              builder: (context, transactionProvider, _) {
+                if (!transactionProvider.isLoaded) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (transactionProvider.transactions.isEmpty) {
+                  return Container(
+                    margin: const EdgeInsets.only(top: 15),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text('Chưa có giao dịch nào'),
+                  );
+                }
+
+                final currencyFormat = NumberFormat.currency(
+                  locale: 'en_US',
+                  symbol: '\$',
+                  decimalDigits: 2,
+                );
+
+                return Column(
+                  children: transactionProvider.transactions.take(5).map((tx) {
+                    final isIncome = tx.amount >= 0;
+                    final amountText =
+                        '${isIncome ? '+' : '-'}${currencyFormat.format(tx.amount.abs())}';
+                    return _buildTransactionItem(
+                      isIncome ? Icons.arrow_upward : Icons.arrow_downward,
+                      tx.title,
+                      DateFormat('MMM d, yyyy - hh:mm a').format(tx.time),
+                      amountText,
+                      isIncome ? Colors.green : Colors.redAccent,
+                    );
+                  }).toList(),
+                );
+              },
+            ),
           ],
         ),
       ),

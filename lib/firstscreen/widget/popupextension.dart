@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 extension FloatingOverlayExtension on Widget {
-  void showFloatingOverlay(BuildContext context,
+  OverlayEntry showFloatingOverlay(BuildContext context,
       {double? height, double? width}) {
     final overlay = Overlay.of(context);
     late final OverlayEntry overlayEntry;
@@ -28,6 +28,7 @@ extension FloatingOverlayExtension on Widget {
       ),
     );
     overlay.insert(overlayEntry);
+    return overlayEntry;
   }
 
   void hideFloatingOverlay(BuildContext context) {

@@ -21,7 +21,7 @@ class AppInitializer {
       await prefs.setBool('userProfileExists', true);
       await prefs.setString('userName', '');
       await prefs.setString('userEmail', '');
-      await prefs.setString('userAvatar', 'https://i.pravatar.cc/150?img=11');
+      await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
       print('✅ User profile initialized');
     }
   }

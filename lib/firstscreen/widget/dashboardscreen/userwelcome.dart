@@ -17,7 +17,7 @@ class UserWelcome extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 25,
-          backgroundImage: AssetImage(userAvatar),
+          backgroundImage: _avatarProvider(userAvatar),
         ),
         const SizedBox(width: 12),
         Column(
@@ -31,5 +31,12 @@ class UserWelcome extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  ImageProvider _avatarProvider(String avatar) {
+    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+      return NetworkImage(avatar);
+    }
+    return AssetImage(avatar);
   }
 }
