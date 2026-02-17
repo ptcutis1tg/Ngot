@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/debug.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
 import 'package:flutter_application_1/firstscreen/settings_screen.dart';
@@ -16,13 +17,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const bool RESET_APP_DATA = false;
+const bool resetAppData = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DebugHelper.printAllData();
+
+  if (kDebugMode) {
+    DebugHelper.printAllData();
+  }
+
   await initializeUserProfile();
-  await AppInitializer.initialize(resetData: RESET_APP_DATA);
+  await AppInitializer.initialize(resetData: resetAppData);
 
   runApp(
     MultiProvider(
@@ -201,7 +206,8 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
               barrierDismissible: true,
               builder: (dialogContext) => Dialog(
                 backgroundColor: Colors.transparent,
-                insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                insetPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 child: AddTransactionWidget(
                   onAdd: (TransactionProfile tx) {
                     context.read<TransactionProvider>().addTransaction(tx);

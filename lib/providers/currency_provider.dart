@@ -31,50 +31,52 @@ class CurrencyProvider extends ChangeNotifier {
     ),
     CurrencyOption(
       code: 'VND',
-      symbol: '₫',
+      symbol: 'VND',
       locale: 'vi_VN',
       decimalDigits: 0,
       displayName: 'Vietnamese Dong',
     ),
     CurrencyOption(
       code: 'JPY',
-      symbol: '¥',
+      symbol: 'JPY',
       locale: 'ja_JP',
       decimalDigits: 0,
       displayName: 'Japanese Yen',
     ),
     CurrencyOption(
       code: 'EUR',
-      symbol: '€',
+      symbol: 'EUR',
       locale: 'de_DE',
       decimalDigits: 2,
       displayName: 'Euro',
     ),
     CurrencyOption(
       code: 'GBP',
-      symbol: '£',
+      symbol: 'GBP',
       locale: 'en_GB',
       decimalDigits: 2,
       displayName: 'British Pound',
     ),
   ];
 
+  final Future<SharedPreferences> _prefsFuture = SharedPreferences.getInstance();
+
   CurrencyOption _selected = supportedCurrencies.first;
   bool _loaded = false;
+  late NumberFormat _numberFormat = _buildFormat(_selected);
 
   CurrencyOption get selected => _selected;
-
-  NumberFormat get numberFormat => NumberFormat.currency(
-        locale: _selected.locale,
-        symbol: _selected.symbol,
-        decimalDigits: _selected.decimalDigits,
-      );
+  NumberFormat get numberFormat => _numberFormat;
 
   Future<void> loadCurrency() async {
     if (_loaded) return;
-    final prefs = await SharedPreferences.getInstance();
+
+    final prefs = await _prefsFuture;
     final code = prefs.getString(_currencyCodeKey) ?? supportedCurrencies.first.code;
-    _selected = _findCurrency(code);
+    final next = _findCurrency(code);
+
+    _selected = next;
+    _numberFormat = _buildFormat(next);
     _loaded = true;
     notifyListeners();
   }
@@ -82,8 +84,11 @@ class CurrencyProvider extends ChangeNotifier {
   Future<void> setCurrencyByCode(String code) async {
     final next = _findCurrency(code);
     if (next.code == _selected.code) return;
+
     _selected = next;
-    final prefs = await SharedPreferences.getInstance();
+    _numberFormat = _buildFormat(next);
+
+    final prefs = await _prefsFuture;
     await prefs.setString(_currencyCodeKey, _selected.code);
     notifyListeners();
   }
@@ -92,6 +97,14 @@ class CurrencyProvider extends ChangeNotifier {
     return supportedCurrencies.firstWhere(
       (item) => item.code == code,
       orElse: () => supportedCurrencies.first,
+    );
+  }
+
+  NumberFormat _buildFormat(CurrencyOption option) {
+    return NumberFormat.currency(
+      locale: option.locale,
+      symbol: option.symbol,
+      decimalDigits: option.decimalDigits,
     );
   }
 }
