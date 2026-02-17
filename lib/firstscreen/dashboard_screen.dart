@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/widget/dashboardscreen/userwelcome.dart';
+import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,8 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = context.watch<CurrencyProvider>().numberFormat;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA), // Màu nền xám nhạt cực sang
       appBar: AppBar(
@@ -46,11 +49,6 @@ class DashboardScreen extends StatelessWidget {
                 final expense = transactionProvider.transactions
                     .where((t) => t.amount < 0)
                     .fold<double>(0, (sum, t) => sum + t.amount.abs());
-                final currencyFormat = NumberFormat.currency(
-                  locale: 'en_US',
-                  symbol: '\$',
-                  decimalDigits: 2,
-                );
 
                 return Container(
                   width: double.infinity,
@@ -135,12 +133,6 @@ class DashboardScreen extends StatelessWidget {
                     child: const Text('Chưa có giao dịch nào'),
                   );
                 }
-
-                final currencyFormat = NumberFormat.currency(
-                  locale: 'en_US',
-                  symbol: '\$',
-                  decimalDigits: 2,
-                );
 
                 return Column(
                   children: transactionProvider.transactions.take(5).map((tx) {

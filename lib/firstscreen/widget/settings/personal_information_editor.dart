@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +50,18 @@ class _PersonalInformationEditorState extends State<PersonalInformationEditor> {
     Navigator.of(context).pop();
   }
 
+  Future<void> _pickAvatarFromExplorer() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final path = result.files.single.path;
+    if (path == null || path.isEmpty) return;
+    _avatarController.text = path;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -71,9 +86,19 @@ class _PersonalInformationEditorState extends State<PersonalInformationEditor> {
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: CircleAvatar(
-                    radius: 36,
-                    backgroundImage: _avatarProvider(_avatarController.text),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 36,
+                        backgroundImage: _avatarProvider(_avatarController.text),
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: _pickAvatarFromExplorer,
+                        icon: const Icon(Icons.photo_library_outlined),
+                        label: const Text('Chọn ảnh từ máy'),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -134,11 +159,15 @@ class _PersonalInformationEditorState extends State<PersonalInformationEditor> {
   }
 
   ImageProvider _avatarProvider(String avatar) {
-    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
-      return NetworkImage(avatar);
+    final value = avatar.trim();
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return NetworkImage(value);
+    }
+    if (value.isNotEmpty && File(value).existsSync()) {
+      return FileImage(File(value));
     }
     return AssetImage(
-      avatar.isEmpty ? 'assets/user/anonymous.jpg' : avatar,
+      value.isEmpty ? 'assets/user/anonymous.jpg' : value,
     );
   }
 }

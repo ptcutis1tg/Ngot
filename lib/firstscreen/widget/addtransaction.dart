@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/providers/currency_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/transactionproflie.dart';
 
 class AddTransactionWidget extends StatefulWidget {
@@ -34,6 +36,8 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final currency = context.watch<CurrencyProvider>().selected;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
@@ -64,7 +68,9 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
               ),
               const SizedBox(height: 12),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Số tiền'),
+                decoration: InputDecoration(
+                  labelText: 'Số tiền (${currency.code})',
+                ),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
@@ -87,7 +93,7 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                   ),
                   DropdownMenuItem<bool>(
                     value: false,
-                    child: Text('Thu nhập'),
+                    child: Text('Nhận tiền'),
                   ),
                 ],
                 onChanged: (value) {
@@ -106,6 +112,7 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
+                    useRootNavigator: true,
                     initialDate: _selectedDate,
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
@@ -137,3 +144,4 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
     );
   }
 }
+

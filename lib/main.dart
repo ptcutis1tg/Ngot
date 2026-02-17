@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
 import 'package:flutter_application_1/firstscreen/widget/addtransaction.dart';
-import 'package:flutter_application_1/firstscreen/widget/popupextension.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
+import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +30,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => TransactionProvider()),
         ChangeNotifierProvider(create: (context) => UserProfileProvider()),
         ChangeNotifierProvider(create: (context) => BackupProvider()),
+        ChangeNotifierProvider(create: (context) => CurrencyProvider()),
       ],
       child: const DailyExpenseApp(),
     ),
@@ -119,6 +120,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       context.read<UserProfileProvider>().loadProfile();
       context.read<TransactionProvider>().loadTransactions();
       context.read<BackupProvider>().loadConfig();
+      context.read<CurrencyProvider>().loadCurrency();
     });
   }
 
@@ -168,15 +170,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         margin: const EdgeInsets.only(bottom: 16.0, right: 16.0),
         child: RawMaterialButton(
           onPressed: () {
-            late OverlayEntry entry;
-            entry = AddTransactionWidget(
-              onAdd: (TransactionProfile p1) {
-                context.read<TransactionProvider>().addTransaction(p1);
-              },
-              onClose: () => entry.remove(),
-            ).showFloatingOverlay(
-              context,
-              width: MediaQuery.of(context).size.width * 0.9,
+            showDialog<void>(
+              context: context,
+              barrierDismissible: true,
+              builder: (dialogContext) => Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                child: AddTransactionWidget(
+                  onAdd: (TransactionProfile p1) {
+                    context.read<TransactionProvider>().addTransaction(p1);
+                  },
+                  onClose: () => Navigator.of(dialogContext).pop(),
+                ),
+              ),
             );
           },
           fillColor: Theme.of(context).colorScheme.primary,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class UserWelcome extends StatelessWidget {
@@ -34,9 +36,15 @@ class UserWelcome extends StatelessWidget {
   }
 
   ImageProvider _avatarProvider(String avatar) {
-    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
-      return NetworkImage(avatar);
+    final value = avatar.trim();
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return NetworkImage(value);
     }
-    return AssetImage(avatar);
+    if (value.isNotEmpty && File(value).existsSync()) {
+      return FileImage(File(value));
+    }
+    return AssetImage(
+      value.isEmpty ? 'assets/user/anonymous.jpg' : value,
+    );
   }
 }

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/widget/settings/personal_information_editor.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
+import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:intl/intl.dart';
@@ -76,6 +79,15 @@ class SettingsScreen extends StatelessWidget {
               Icons.account_balance_outlined,
               'Bank Accounts',
               '3 linked',
+            ),
+            Consumer<CurrencyProvider>(
+              builder: (context, currencyProvider, _) => _buildSettingItem(
+                context,
+                Icons.currency_exchange,
+                'Currency',
+                '${currencyProvider.selected.code} (${currencyProvider.selected.symbol})',
+                onTap: () => _showCurrencyDialog(context, currencyProvider),
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -251,10 +263,16 @@ class SettingsScreen extends StatelessWidget {
   }
 
   ImageProvider _avatarProvider(String avatar) {
-    if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
-      return NetworkImage(avatar);
+    final value = avatar.trim();
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return NetworkImage(value);
     }
-    return AssetImage(avatar);
+    if (value.isNotEmpty && File(value).existsSync()) {
+      return FileImage(File(value));
+    }
+    return AssetImage(
+      value.isEmpty ? 'assets/user/anonymous.jpg' : value,
+    );
   }
 
   Future<void> _showEndpointDialog(
@@ -298,6 +316,51 @@ class SettingsScreen extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const PersonalInformationEditor(),
+    );
+  }
+
+  Future<void> _showCurrencyDialog(
+    BuildContext context,
+    CurrencyProvider currencyProvider,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Select currency'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: CurrencyProvider.supportedCurrencies
+                    .map(
+                      (currency) => ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('${currency.code} (${currency.symbol})'),
+                        subtitle: Text(currency.displayName),
+                        trailing: currency.code == currencyProvider.selected.code
+                            ? const Icon(Icons.check, color: Color(0xFF2ECC71))
+                            : null,
+                        onTap: () async {
+                          await currencyProvider.setCurrencyByCode(currency.code);
+                          if (!dialogContext.mounted) return;
+                          Navigator.of(dialogContext).pop();
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
