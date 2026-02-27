@@ -59,7 +59,8 @@ class CurrencyProvider extends ChangeNotifier {
     ),
   ];
 
-  final Future<SharedPreferences> _prefsFuture = SharedPreferences.getInstance();
+  final Future<SharedPreferences> _prefsFuture =
+      SharedPreferences.getInstance();
 
   CurrencyOption _selected = supportedCurrencies.first;
   bool _loaded = false;
@@ -72,7 +73,8 @@ class CurrencyProvider extends ChangeNotifier {
     if (_loaded) return;
 
     final prefs = await _prefsFuture;
-    final code = prefs.getString(_currencyCodeKey) ?? supportedCurrencies.first.code;
+    final code =
+        prefs.getString(_currencyCodeKey) ?? supportedCurrencies.first.code;
     final next = _findCurrency(code);
 
     _selected = next;

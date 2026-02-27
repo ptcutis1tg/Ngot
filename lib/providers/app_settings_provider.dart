@@ -7,6 +7,10 @@ class AppSettingsProvider extends ChangeNotifier {
   static const String _biometricKey = 'settings_biometric';
   static const String _bankAccountsKey = 'settings_bank_accounts_count';
   static const String _passwordKey = 'settings_app_password';
+  static const String _languageCodeKey = 'settings_language_code';
+
+  final Future<SharedPreferences> _prefsFuture =
+      SharedPreferences.getInstance();
 
   bool _loaded = false;
   bool _darkMode = false;
@@ -14,49 +18,74 @@ class AppSettingsProvider extends ChangeNotifier {
   bool _biometricEnabled = false;
   int _bankAccountsCount = 0;
   String _password = '';
+  String _languageCode = 'vi';
 
   bool get darkMode => _darkMode;
   bool get notificationsEnabled => _notificationsEnabled;
   bool get biometricEnabled => _biometricEnabled;
   int get bankAccountsCount => _bankAccountsCount;
+  String get languageCode => _languageCode;
+  Locale get locale => Locale(_languageCode);
 
   Future<void> loadSettings() async {
     if (_loaded) return;
-    final prefs = await SharedPreferences.getInstance();
+
+    final prefs = await _prefsFuture;
     _darkMode = prefs.getBool(_darkModeKey) ?? false;
     _notificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
     _biometricEnabled = prefs.getBool(_biometricKey) ?? false;
     _bankAccountsCount = prefs.getInt(_bankAccountsKey) ?? 0;
     _password = prefs.getString(_passwordKey) ?? '';
+    _languageCode = prefs.getString(_languageCodeKey) ?? 'vi';
     _loaded = true;
     notifyListeners();
   }
 
   Future<void> setDarkMode(bool value) async {
+    if (_darkMode == value) return;
+
     _darkMode = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsFuture;
     await prefs.setBool(_darkModeKey, value);
     notifyListeners();
   }
 
   Future<void> setNotificationsEnabled(bool value) async {
+    if (_notificationsEnabled == value) return;
+
     _notificationsEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsFuture;
     await prefs.setBool(_notificationsKey, value);
     notifyListeners();
   }
 
   Future<void> setBiometricEnabled(bool value) async {
+    if (_biometricEnabled == value) return;
+
     _biometricEnabled = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsFuture;
     await prefs.setBool(_biometricKey, value);
     notifyListeners();
   }
 
   Future<void> setBankAccountsCount(int value) async {
-    _bankAccountsCount = value < 0 ? 0 : value;
-    final prefs = await SharedPreferences.getInstance();
+    final next = value < 0 ? 0 : value;
+    if (_bankAccountsCount == next) return;
+
+    _bankAccountsCount = next;
+    final prefs = await _prefsFuture;
     await prefs.setInt(_bankAccountsKey, _bankAccountsCount);
+    notifyListeners();
+  }
+
+  Future<void> setLanguageCode(String value) async {
+    final next = value.trim().toLowerCase();
+    if (next != 'vi' && next != 'en') return;
+    if (_languageCode == next) return;
+
+    _languageCode = next;
+    final prefs = await _prefsFuture;
+    await prefs.setString(_languageCodeKey, _languageCode);
     notifyListeners();
   }
 
@@ -66,16 +95,20 @@ class AppSettingsProvider extends ChangeNotifier {
     required String confirmPassword,
   }) async {
     if (newPassword.length < 4) {
-      return 'Mật khẩu mới cần ít nhất 4 ký tự';
+      return 'New password must be at least 4 characters';
     }
     if (newPassword != confirmPassword) {
-      return 'Xác nhận mật khẩu không khớp';
+      return 'Password confirmation does not match';
     }
     if (_password.isNotEmpty && currentPassword != _password) {
-      return 'Mật khẩu hiện tại không đúng';
+      return 'Current password is incorrect';
     }
+    if (_password == newPassword) {
+      return null;
+    }
+
     _password = newPassword;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsFuture;
     await prefs.setString(_passwordKey, _password);
     notifyListeners();
     return null;

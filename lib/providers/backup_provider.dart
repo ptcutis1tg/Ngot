@@ -13,10 +13,13 @@ class BackupProvider extends ChangeNotifier {
   static const String _lastBackupAtKey = 'backup_last_at';
   static const String _lastBackupStatusKey = 'backup_last_status';
 
+  final Future<SharedPreferences> _prefsFuture =
+      SharedPreferences.getInstance();
+
   bool _enabled = false;
   String _serverUrl = '';
   DateTime? _lastBackupAt;
-  String _lastBackupStatus = 'Chưa sao lưu';
+  String _lastBackupStatus = 'No backup yet';
   bool _isBackingUp = false;
   bool _loaded = false;
 
@@ -28,27 +31,33 @@ class BackupProvider extends ChangeNotifier {
 
   Future<void> loadConfig() async {
     if (_loaded) return;
-    final prefs = await SharedPreferences.getInstance();
+
+    final prefs = await _prefsFuture;
     _enabled = prefs.getBool(_backupEnabledKey) ?? false;
     _serverUrl = prefs.getString(_backupServerUrlKey) ?? '';
     final rawDate = prefs.getString(_lastBackupAtKey);
     _lastBackupAt = rawDate == null ? null : DateTime.tryParse(rawDate);
     _lastBackupStatus =
-        prefs.getString(_lastBackupStatusKey) ?? 'Chưa sao lưu';
+        prefs.getString(_lastBackupStatusKey) ?? 'No backup yet';
     _loaded = true;
     notifyListeners();
   }
 
   Future<void> setEnabled(bool value) async {
+    if (_enabled == value) return;
+
     _enabled = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsFuture;
     await prefs.setBool(_backupEnabledKey, value);
     notifyListeners();
   }
 
   Future<void> setServerUrl(String value) async {
-    _serverUrl = value.trim();
-    final prefs = await SharedPreferences.getInstance();
+    final next = value.trim();
+    if (_serverUrl == next) return;
+
+    _serverUrl = next;
+    final prefs = await _prefsFuture;
     await prefs.setString(_backupServerUrlKey, _serverUrl);
     notifyListeners();
   }
@@ -58,7 +67,7 @@ class BackupProvider extends ChangeNotifier {
     required TransactionProvider transactionProvider,
   }) async {
     if (!_enabled || _serverUrl.isEmpty) {
-      _lastBackupStatus = 'Tắt sao lưu hoặc chưa có URL';
+      _lastBackupStatus = 'Backup disabled or missing endpoint URL';
       notifyListeners();
       return false;
     }
@@ -88,16 +97,16 @@ class BackupProvider extends ChangeNotifier {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         _lastBackupAt = DateTime.now();
-        _lastBackupStatus = 'Sao lưu thành công';
+        _lastBackupStatus = 'Backup completed';
         await _persistBackupMeta();
         return true;
       }
 
-      _lastBackupStatus = 'Lỗi server: ${response.statusCode}';
+      _lastBackupStatus = 'Server error: ${response.statusCode}';
       await _persistBackupMeta();
       return false;
     } catch (_) {
-      _lastBackupStatus = 'Không thể kết nối server';
+      _lastBackupStatus = 'Cannot connect to backup server';
       await _persistBackupMeta();
       return false;
     } finally {
@@ -107,7 +116,7 @@ class BackupProvider extends ChangeNotifier {
   }
 
   Future<void> _persistBackupMeta() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefsFuture;
     if (_lastBackupAt != null) {
       await prefs.setString(_lastBackupAtKey, _lastBackupAt!.toIso8601String());
     }

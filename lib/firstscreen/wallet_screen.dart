@@ -9,7 +9,6 @@ class WalletScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFFF8F9FA),
       appBar: _WalletAppBar(),
       body: _WalletBody(),
     );
@@ -33,14 +32,9 @@ class _WalletAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class _WalletBody extends StatefulWidget {
+class _WalletBody extends StatelessWidget {
   const _WalletBody();
 
-  @override
-  State<_WalletBody> createState() => _WalletBodyState();
-}
-
-class _WalletBodyState extends State<_WalletBody> {
   @override
   Widget build(BuildContext context) {
     final txProvider = context.watch<TransactionProvider>();
@@ -60,10 +54,16 @@ class _WalletBodyState extends State<_WalletBody> {
 
     final now = DateTime.now();
     final monthIncome = txProvider.transactions
-        .where((t) => t.amount > 0 && t.time.year == now.year && t.time.month == now.month)
+        .where((t) =>
+            t.amount > 0 &&
+            t.time.year == now.year &&
+            t.time.month == now.month)
         .fold<double>(0, (sum, t) => sum + t.amount);
     final monthExpense = txProvider.transactions
-        .where((t) => t.amount < 0 && t.time.year == now.year && t.time.month == now.month)
+        .where((t) =>
+            t.amount < 0 &&
+            t.time.year == now.year &&
+            t.time.month == now.month)
         .fold<double>(0, (sum, t) => sum + t.amount.abs());
     final monthlyNet = monthIncome - monthExpense;
 
@@ -173,7 +173,7 @@ class _CardPagerState extends State<_CardPager> {
   }
 }
 
-class _WalletCard extends StatefulWidget {
+class _WalletCard extends StatelessWidget {
   final String label;
   final String amount;
   final String subtitle;
@@ -187,21 +187,17 @@ class _WalletCard extends StatefulWidget {
   });
 
   @override
-  State<_WalletCard> createState() => _WalletCardState();
-}
-
-class _WalletCardState extends State<_WalletCard> {
-  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(right: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: widget.color,
+        color: isDark ? const Color(0xFF232323) : color,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: widget.color.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -215,14 +211,14 @@ class _WalletCardState extends State<_WalletCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                widget.label,
+                label,
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const Icon(Icons.contactless, color: Colors.white, size: 28),
             ],
           ),
           Text(
-            widget.amount,
+            amount,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -230,7 +226,7 @@ class _WalletCardState extends State<_WalletCard> {
             ),
           ),
           Text(
-            widget.subtitle,
+            subtitle,
             style: const TextStyle(
               color: Colors.white,
               letterSpacing: 0.5,
@@ -243,7 +239,7 @@ class _WalletCardState extends State<_WalletCard> {
   }
 }
 
-class _AccountItem extends StatefulWidget {
+class _AccountItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final String amount;
@@ -255,33 +251,33 @@ class _AccountItem extends StatefulWidget {
   });
 
   @override
-  State<_AccountItem> createState() => _AccountItemState();
-}
-
-class _AccountItemState extends State<_AccountItem> {
-  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1B1B1B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           CircleAvatar(
             backgroundColor: const Color(0xFF2ECC71).withValues(alpha: 0.1),
-            child: Icon(widget.icon, color: const Color(0xFF2ECC71)),
+            child: Icon(icon, color: const Color(0xFF2ECC71)),
           ),
           const SizedBox(width: 15),
           Expanded(
             child: Text(
-              widget.title,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              title,
+              style: TextStyle(fontWeight: FontWeight.w600, color: onSurface),
             ),
           ),
-          Text(widget.amount, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            amount,
+            style: TextStyle(fontWeight: FontWeight.bold, color: onSurface),
+          ),
         ],
       ),
     );

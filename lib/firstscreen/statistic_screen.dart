@@ -16,7 +16,6 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFFF8F9FA),
       appBar: _StatisticsAppBar(),
       body: _StatisticsBody(),
     );
@@ -216,6 +215,7 @@ class _FilterChip extends StatefulWidget {
 class _FilterChipState extends State<_FilterChip> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: widget.onTap,
       borderRadius: BorderRadius.circular(20),
@@ -223,13 +223,17 @@ class _FilterChipState extends State<_FilterChip> {
         padding: const EdgeInsets.symmetric(vertical: 10),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: widget.selected ? const Color(0xFF2ECC71) : Colors.white,
+          color: widget.selected
+              ? const Color(0xFF2ECC71)
+              : (isDark ? const Color(0xFF1B1B1B) : Colors.white),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           widget.title,
           style: TextStyle(
-            color: widget.selected ? Colors.white : Colors.grey,
+            color: widget.selected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.grey),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -250,6 +254,7 @@ class _ChartSection extends StatefulWidget {
 class _ChartSectionState extends State<_ChartSection> {
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,7 +266,12 @@ class _ChartSectionState extends State<_ChartSection> {
         SizedBox(
           height: 250,
           child: widget.buckets.every((b) => b.total == 0)
-              ? const Center(child: Text('No expense data in selected range'))
+              ? Center(
+                  child: Text(
+                    'No expense data in selected range',
+                    style: TextStyle(color: onSurface.withValues(alpha: 0.8)),
+                  ),
+                )
               : LineChart(_lineDataFromBuckets(widget.buckets)),
         ),
       ],
@@ -348,6 +358,7 @@ class _TopSpendingSection extends StatefulWidget {
 class _TopSpendingSectionState extends State<_TopSpendingSection> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -361,7 +372,7 @@ class _TopSpendingSectionState extends State<_TopSpendingSection> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1B1B1B) : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Text('No spending in selected range'),
@@ -414,11 +425,12 @@ class _CategoryTile extends StatefulWidget {
 class _CategoryTileState extends State<_CategoryTile> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF232323) : Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

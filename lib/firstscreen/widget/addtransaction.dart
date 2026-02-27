@@ -43,7 +43,9 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF232323)
+              : Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Form(

@@ -11,7 +11,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
+import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 
@@ -22,6 +24,8 @@ void main() {
       'userAvatar': 'assets/user/anonymous.jpg',
       'userName': 'Test User',
       'userEmail': 'test@example.com',
+      'onboarding_completed': true,
+      'settings_language_code': 'en',
     });
 
     // Build our app and trigger a frame.
@@ -31,10 +35,13 @@ void main() {
           ChangeNotifierProvider(create: (_) => TransactionProvider()),
           ChangeNotifierProvider(create: (_) => UserProfileProvider()),
           ChangeNotifierProvider(create: (_) => BackupProvider()),
+          ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+          ChangeNotifierProvider(create: (_) => CurrencyProvider()),
         ],
         child: const DailyExpenseApp(),
       ),
     );
+    await tester.pumpAndSettle();
 
     // Verify that the title 'Dashboard' is present in the BottomNavigationBar.
     expect(find.text('Dashboard'), findsOneWidget);

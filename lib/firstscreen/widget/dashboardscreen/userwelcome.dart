@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,7 @@ class UserWelcome extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
+          key: ValueKey<String>(userAvatar),
           radius: 25,
           backgroundImage: _avatarProvider(userAvatar),
         ),
@@ -37,7 +39,18 @@ class UserWelcome extends StatelessWidget {
   }
 
   ImageProvider _avatarProvider(String avatar) {
-    final value = avatar.trim();
+    var value = avatar.trim();
+    if (value.startsWith('memory:')) {
+      final encoded = value.substring('memory:'.length);
+      try {
+        return MemoryImage(base64Decode(encoded));
+      } catch (_) {
+        return const AssetImage('assets/user/anonymous.jpg');
+      }
+    }
+    if (value.startsWith('file://')) {
+      value = Uri.parse(value).toFilePath();
+    }
     if (value.startsWith('http://') || value.startsWith('https://')) {
       return NetworkImage(value);
     }
@@ -48,9 +61,11 @@ class UserWelcome extends StatelessWidget {
       return AssetImage(value);
     }
     if (!kIsWeb) {
+      if (!File(value).existsSync()) {
+        return const AssetImage('assets/user/anonymous.jpg');
+      }
       return FileImage(File(value));
     }
     return const AssetImage('assets/user/anonymous.jpg');
   }
 }
-

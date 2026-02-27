@@ -12,7 +12,6 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFFF8F9FA),
       appBar: _DashboardAppBar(),
       body: _DashboardBody(),
     );
@@ -39,14 +38,9 @@ class _DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class _DashboardBody extends StatefulWidget {
+class _DashboardBody extends StatelessWidget {
   const _DashboardBody();
 
-  @override
-  State<_DashboardBody> createState() => _DashboardBodyState();
-}
-
-class _DashboardBodyState extends State<_DashboardBody> {
   @override
   Widget build(BuildContext context) {
     return const SingleChildScrollView(
@@ -66,14 +60,9 @@ class _DashboardBodyState extends State<_DashboardBody> {
   }
 }
 
-class _ProfileSection extends StatefulWidget {
+class _ProfileSection extends StatelessWidget {
   const _ProfileSection();
 
-  @override
-  State<_ProfileSection> createState() => _ProfileSectionState();
-}
-
-class _ProfileSectionState extends State<_ProfileSection> {
   @override
   Widget build(BuildContext context) {
     return Consumer<UserProfileProvider>(
@@ -87,16 +76,12 @@ class _ProfileSectionState extends State<_ProfileSection> {
   }
 }
 
-class _BalanceCard extends StatefulWidget {
+class _BalanceCard extends StatelessWidget {
   const _BalanceCard();
 
   @override
-  State<_BalanceCard> createState() => _BalanceCardState();
-}
-
-class _BalanceCardState extends State<_BalanceCard> {
-  @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final currencyFormat = context.watch<CurrencyProvider>().numberFormat;
 
     return Consumer<TransactionProvider>(
@@ -112,11 +97,11 @@ class _BalanceCardState extends State<_BalanceCard> {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -124,11 +109,15 @@ class _BalanceCardState extends State<_BalanceCard> {
           ),
           child: Column(
             children: [
-              Text('Total Balance', style: TextStyle(color: Colors.grey[500])),
+              Text(
+                'Total Balance',
+                style: TextStyle(color: scheme.onSurface.withValues(alpha: 0.7)),
+              ),
               const SizedBox(height: 8),
               Text(
                 currencyFormat.format(txProvider.totalBalance),
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               Row(
@@ -156,7 +145,7 @@ class _BalanceCardState extends State<_BalanceCard> {
   }
 }
 
-class _IncomeExpenseTile extends StatefulWidget {
+class _IncomeExpenseTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final String amount;
@@ -170,23 +159,22 @@ class _IncomeExpenseTile extends StatefulWidget {
   });
 
   @override
-  State<_IncomeExpenseTile> createState() => _IncomeExpenseTileState();
-}
-
-class _IncomeExpenseTileState extends State<_IncomeExpenseTile> {
-  @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Column(
       children: [
         CircleAvatar(
-          backgroundColor: widget.color.withValues(alpha: 0.1),
-          child: Icon(widget.icon, color: widget.color, size: 20),
+          backgroundColor: color.withValues(alpha: 0.1),
+          child: Icon(icon, color: color, size: 20),
         ),
         const SizedBox(height: 8),
-        Text(widget.label, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
         Text(
-          widget.amount,
-          style: TextStyle(color: widget.color, fontWeight: FontWeight.bold),
+          label,
+          style: TextStyle(color: onSurface.withValues(alpha: 0.7), fontSize: 12),
+        ),
+        Text(
+          amount,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -207,21 +195,17 @@ class _RecentHeader extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {},
-          child: const Text('See All', style: TextStyle(color: Color(0xFF2ECC71))),
+          child:
+              const Text('See All', style: TextStyle(color: Color(0xFF2ECC71))),
         ),
       ],
     );
   }
 }
 
-class _RecentList extends StatefulWidget {
+class _RecentList extends StatelessWidget {
   const _RecentList();
 
-  @override
-  State<_RecentList> createState() => _RecentListState();
-}
-
-class _RecentListState extends State<_RecentList> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = context.watch<CurrencyProvider>().numberFormat;
@@ -239,7 +223,7 @@ class _RecentListState extends State<_RecentList> {
             margin: const EdgeInsets.only(top: 15),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Text('Chua co giao dich nao'),
@@ -265,7 +249,7 @@ class _RecentListState extends State<_RecentList> {
   }
 }
 
-class _TransactionRow extends StatefulWidget {
+class _TransactionRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String date;
@@ -281,17 +265,13 @@ class _TransactionRow extends StatefulWidget {
   });
 
   @override
-  State<_TransactionRow> createState() => _TransactionRowState();
-}
-
-class _TransactionRowState extends State<_TransactionRow> {
-  @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       margin: const EdgeInsets.only(top: 15),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -299,26 +279,29 @@ class _TransactionRowState extends State<_TransactionRow> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: widget.iconBg.withValues(alpha: 0.1),
+              color: iconBg.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(widget.icon, color: widget.iconBg),
+            child: Icon(icon, color: iconBg),
           ),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(widget.date, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(date,
+                    style:
+                        TextStyle(color: onSurface.withValues(alpha: 0.7), fontSize: 12)),
               ],
             ),
           ),
           Text(
-            widget.amount,
+            amount,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: widget.amount.startsWith('+') ? Colors.green : Colors.black,
+              color: amount.startsWith('+') ? Colors.green : onSurface,
             ),
           ),
         ],

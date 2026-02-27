@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_application_1/debug.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
+import 'package:flutter_application_1/firstscreen/onboarding_flow.dart';
 import 'package:flutter_application_1/firstscreen/settings_screen.dart';
 import 'package:flutter_application_1/firstscreen/statistic_screen.dart';
 import 'package:flutter_application_1/firstscreen/wallet_screen.dart';
@@ -18,6 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const bool resetAppData = false;
+const bool resetOnboardingFlowOnly = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +31,9 @@ void main() async {
 
   await initializeUserProfile();
   await AppInitializer.initialize(resetData: resetAppData);
+  await resetOnboardingIfNeeded();
+  final appSettingsProvider = AppSettingsProvider();
+  await appSettingsProvider.loadSettings();
 
   runApp(
     MultiProvider(
@@ -35,7 +41,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
         ChangeNotifierProvider(create: (_) => UserProfileProvider()),
         ChangeNotifierProvider(create: (_) => BackupProvider()),
-        ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => appSettingsProvider),
         ChangeNotifierProvider(create: (_) => CurrencyProvider()),
       ],
       child: const DailyExpenseApp(),
@@ -54,6 +60,12 @@ Future<void> initializeUserProfile() async {
   await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
 }
 
+Future<void> resetOnboardingIfNeeded() async {
+  if (!resetOnboardingFlowOnly) return;
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('onboarding_completed');
+}
+
 class DailyExpenseApp extends StatelessWidget {
   const DailyExpenseApp({super.key});
 
@@ -65,6 +77,16 @@ class DailyExpenseApp extends StatelessWidget {
       title: 'Daily Expense Diary',
       debugShowCheckedModeBanner: false,
       themeMode: appSettings.darkMode ? ThemeMode.dark : ThemeMode.light,
+      locale: appSettings.locale,
+      supportedLocales: const [
+        Locale('vi'),
+        Locale('en'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -87,15 +109,54 @@ class DailyExpenseApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2ECC71),
-          brightness: Brightness.dark,
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF2ECC71),
+          secondary: Color(0xFF27AE60),
+          surface: Color(0xFF121212),
+          onSurface: Colors.white,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF000000),
+        canvasColor: const Color(0xFF000000),
+        cardColor: const Color(0xFF1B1B1B),
+        dividerColor: const Color(0xFF2A2A2A),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF000000),
+          foregroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        listTileTheme: const ListTileThemeData(
+          tileColor: Color(0xFF1B1B1B),
+          iconColor: Colors.white70,
+          textColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF101010),
+          selectedItemColor: Color(0xFF2ECC71),
+          unselectedItemColor: Colors.white70,
+          selectedIconTheme: IconThemeData(color: Color(0xFF2ECC71)),
+          unselectedIconTheme: IconThemeData(color: Colors.white70),
+          type: BottomNavigationBarType.fixed,
+        ),
+        dialogTheme: const DialogThemeData(
+          backgroundColor: Color(0xFF1E1E1E),
+          titleTextStyle: TextStyle(color: Colors.white),
+          contentTextStyle: TextStyle(color: Colors.white70),
         ),
         textTheme: GoogleFonts.interTextTheme(
           ThemeData(brightness: Brightness.dark).textTheme,
+        ).apply(
+          bodyColor: Colors.white,
+          displayColor: Colors.white,
         ),
       ),
-      home: const MainNavigationScreen(),
+      home: const AppLaunchGate(child: MainNavigationScreen()),
     );
   }
 }
@@ -136,7 +197,6 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
       context.read<UserProfileProvider>().loadProfile();
       context.read<TransactionProvider>().loadTransactions();
       context.read<BackupProvider>().loadConfig();
-      context.read<AppSettingsProvider>().loadSettings();
       context.read<CurrencyProvider>().loadCurrency();
     });
   }
@@ -158,6 +218,9 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
 
   @override
   Widget build(BuildContext context) {
+    final isVietnamese =
+        context.watch<AppSettingsProvider>().languageCode == 'vi';
+
     return Scaffold(
       body: PageView(
         controller: _pageController,
@@ -174,31 +237,32 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
         onTap: _onNavTap,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor:
+            Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            label: 'Dashboard',
+            icon: const Icon(Icons.dashboard_outlined),
+            label: isVietnamese ? 'Trang chủ' : 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            label: 'Statistics',
+            icon: const Icon(Icons.bar_chart_outlined),
+            label: isVietnamese ? 'Thống kê' : 'Statistics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            label: 'Wallets',
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            label: isVietnamese ? 'Ví tiền' : 'Wallets',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            label: isVietnamese ? 'Cài đặt' : 'Settings',
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 16, right: 16),
+        margin: EdgeInsets.zero,
         child: RawMaterialButton(
           onPressed: () {
             showDialog<void>(

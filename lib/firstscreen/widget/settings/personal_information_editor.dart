@@ -1,9 +1,11 @@
-﻿import 'dart:io';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class PersonalInformationEditor extends StatelessWidget {
@@ -63,14 +65,59 @@ class _PersonalInformationEditorBodyState
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
+      withData: true,
     );
     if (result == null || result.files.isEmpty) return;
 
-    final path = result.files.single.path;
-    if (path == null || path.isEmpty) return;
+    final savedValue = await _persistPickedAvatar(result.files.single);
+    if (savedValue == null || savedValue.isEmpty) return;
 
-    _avatarController.text = path;
+    _avatarController.text = savedValue;
+    if (!mounted) return;
+    await context.read<UserProfileProvider>().setUserAvatar(savedValue);
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    if (!mounted) return;
     setState(() {});
+  }
+
+  Future<String?> _persistPickedAvatar(PlatformFile picked) async {
+    if (kIsWeb) {
+      final bytes = picked.bytes;
+      if (bytes == null || bytes.isEmpty) {
+        return null;
+      }
+      return 'memory:${base64Encode(bytes)}';
+    }
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final avatarsDir = Directory('${appDir.path}/avatars');
+    if (!avatarsDir.existsSync()) {
+      await avatarsDir.create(recursive: true);
+    }
+
+    final extension = (picked.extension?.trim().isNotEmpty ?? false)
+        ? picked.extension!.trim()
+        : 'jpg';
+    final targetPath =
+        '${avatarsDir.path}/avatar_${DateTime.now().millisecondsSinceEpoch}.$extension';
+    final targetFile = File(targetPath);
+
+    final bytes = picked.bytes;
+    if (bytes != null && bytes.isNotEmpty) {
+      await targetFile.writeAsBytes(bytes, flush: true);
+      return targetPath;
+    }
+
+    final sourcePath = picked.path;
+    if (sourcePath != null &&
+        sourcePath.isNotEmpty &&
+        !sourcePath.startsWith('content://')) {
+      await File(sourcePath).copy(targetPath);
+      return targetPath;
+    }
+
+    return null;
   }
 
   @override
@@ -78,9 +125,11 @@ class _PersonalInformationEditorBodyState
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1B1B1B)
+            : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
         top: false,
@@ -108,7 +157,10 @@ class _PersonalInformationEditorBodyState
                   onChanged: () => setState(() {}),
                 ),
                 const SizedBox(height: 18),
-                _EditorActions(onCancel: () => Navigator.of(context).pop(), onSave: _save),
+                _EditorActions(
+                  onCancel: () => Navigator.of(context).pop(),
+                  onSave: _save,
+                ),
               ],
             ),
           ),
@@ -147,6 +199,7 @@ class _AvatarPreviewState extends State<_AvatarPreview> {
       child: Column(
         children: [
           CircleAvatar(
+            key: ValueKey<String>(widget.avatarPath),
             radius: 36,
             backgroundImage: _avatarProvider(widget.avatarPath),
           ),
@@ -244,7 +297,18 @@ class _EditorActions extends StatelessWidget {
 }
 
 ImageProvider _avatarProvider(String avatar) {
-  final value = avatar.trim();
+  var value = avatar.trim();
+  if (value.startsWith('memory:')) {
+    final encoded = value.substring('memory:'.length);
+    try {
+      return MemoryImage(base64Decode(encoded));
+    } catch (_) {
+      return const AssetImage('assets/user/anonymous.jpg');
+    }
+  }
+  if (value.startsWith('file://')) {
+    value = Uri.parse(value).toFilePath();
+  }
   if (value.startsWith('http://') || value.startsWith('https://')) {
     return NetworkImage(value);
   }
@@ -255,6 +319,9 @@ ImageProvider _avatarProvider(String avatar) {
     return AssetImage(value);
   }
   if (!kIsWeb) {
+    if (!File(value).existsSync()) {
+      return const AssetImage('assets/user/anonymous.jpg');
+    }
     return FileImage(File(value));
   }
   return const AssetImage('assets/user/anonymous.jpg');

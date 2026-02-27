@@ -1,4 +1,5 @@
-﻿import 'dart:io';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,6 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFFF8F9FA),
       appBar: _SettingsAppBar(),
       body: _SettingsBody(),
     );
@@ -57,6 +57,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
             onEditPersonal: _openPersonalInformationEditor,
             onOpenBankAccounts: _showBankAccountsDialog,
             onOpenCurrency: _showCurrencyDialog,
+            onOpenLanguage: _showLanguageDialog,
           ),
           const SizedBox(height: 20),
           _SecuritySection(onChangePassword: _showChangePasswordDialog),
@@ -101,11 +102,13 @@ class _SettingsBodyState extends State<_SettingsBody> {
                         contentPadding: EdgeInsets.zero,
                         title: Text('${currency.code} (${currency.symbol})'),
                         subtitle: Text(currency.displayName),
-                        trailing: currency.code == currencyProvider.selected.code
+                        trailing: currency.code ==
+                                currencyProvider.selected.code
                             ? const Icon(Icons.check, color: Color(0xFF2ECC71))
                             : null,
                         onTap: () async {
-                          await currencyProvider.setCurrencyByCode(currency.code);
+                          await currencyProvider
+                              .setCurrencyByCode(currency.code);
                           if (!dialogContext.mounted) return;
                           Navigator.of(dialogContext).pop();
                         },
@@ -114,6 +117,50 @@ class _SettingsBodyState extends State<_SettingsBody> {
                     .toList(),
               ),
             ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showLanguageDialog(AppSettingsProvider appSettings) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Select language'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                value: 'vi',
+                groupValue: appSettings.languageCode,
+                title: const Text('Tiếng Việt'),
+                onChanged: (value) async {
+                  if (value == null) return;
+                  await appSettings.setLanguageCode(value);
+                  if (!dialogContext.mounted) return;
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+              RadioListTile<String>(
+                value: 'en',
+                groupValue: appSettings.languageCode,
+                title: const Text('English'),
+                onChanged: (value) async {
+                  if (value == null) return;
+                  await appSettings.setLanguageCode(value);
+                  if (!dialogContext.mounted) return;
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -174,7 +221,8 @@ class _SettingsBodyState extends State<_SettingsBody> {
               TextField(
                 controller: currentController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Current password'),
+                decoration:
+                    const InputDecoration(labelText: 'Current password'),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -186,7 +234,8 @@ class _SettingsBodyState extends State<_SettingsBody> {
               TextField(
                 controller: confirmController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Confirm password'),
+                decoration:
+                    const InputDecoration(labelText: 'Confirm password'),
               ),
             ],
           ),
@@ -329,12 +378,14 @@ class _ProfileHeaderState extends State<_ProfileHeader> {
   Widget build(BuildContext context) {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
+        final theme = Theme.of(context);
         return Container(
           padding: const EdgeInsets.all(20),
-          color: Colors.white,
+          color: _layerColor(context, 1),
           child: Row(
             children: [
               CircleAvatar(
+                key: ValueKey<String>(userProfile.userAvatar),
                 radius: 35,
                 backgroundImage: _avatarProvider(userProfile.userAvatar),
               ),
@@ -344,12 +395,17 @@ class _ProfileHeaderState extends State<_ProfileHeader> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      userProfile.userName.isNotEmpty ? userProfile.userName : 'Guest',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      userProfile.userName.isNotEmpty
+                          ? userProfile.userName
+                          : 'Guest',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      userProfile.userEmail.isNotEmpty ? userProfile.userEmail : 'No email',
-                      style: TextStyle(color: Colors.grey[600]),
+                      userProfile.userEmail.isNotEmpty
+                          ? userProfile.userEmail
+                          : 'No email',
+                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -366,11 +422,13 @@ class _AccountSection extends StatefulWidget {
   final Future<void> Function() onEditPersonal;
   final Future<void> Function(AppSettingsProvider) onOpenBankAccounts;
   final Future<void> Function(CurrencyProvider) onOpenCurrency;
+  final Future<void> Function(AppSettingsProvider) onOpenLanguage;
 
   const _AccountSection({
     required this.onEditPersonal,
     required this.onOpenBankAccounts,
     required this.onOpenCurrency,
+    required this.onOpenLanguage,
   });
 
   @override
@@ -405,6 +463,15 @@ class _AccountSectionState extends State<_AccountSection> {
             onTap: () => widget.onOpenCurrency(currencyProvider),
           ),
         ),
+        Consumer<AppSettingsProvider>(
+          builder: (context, appSettings, _) => _SettingTile(
+            icon: Icons.language,
+            title: 'Language',
+            trailingText:
+                appSettings.languageCode == 'vi' ? 'Tiếng Việt' : 'English',
+            onTap: () => widget.onOpenLanguage(appSettings),
+          ),
+        ),
       ],
     );
   }
@@ -431,13 +498,11 @@ class _SecuritySectionState extends State<_SecuritySection> {
           trailingText: null,
           onTap: widget.onChangePassword,
         ),
-        Consumer<AppSettingsProvider>(
-          builder: (context, appSettings, _) => _SettingSwitchTile(
-            icon: Icons.fingerprint,
-            title: 'Biometric lock',
-            value: appSettings.biometricEnabled,
-            onChanged: appSettings.setBiometricEnabled,
-          ),
+        const _SettingTile(
+          icon: Icons.fingerprint,
+          title: 'Biometric lock',
+          trailingText: 'Coming soon',
+          onTap: null,
         ),
         Consumer<AppSettingsProvider>(
           builder: (context, appSettings, _) => _SettingSwitchTile(
@@ -505,6 +570,7 @@ class _BackupSection extends StatefulWidget {
 class _BackupSectionState extends State<_BackupSection> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         const _SectionTitle('Local & Backup'),
@@ -512,12 +578,13 @@ class _BackupSectionState extends State<_BackupSection> {
           builder: (localContext, backupProvider, _) {
             final lastBackupText = backupProvider.lastBackupAt == null
                 ? 'Never'
-                : DateFormat('yyyy-MM-dd HH:mm').format(backupProvider.lastBackupAt!);
+                : DateFormat('yyyy-MM-dd HH:mm')
+                    .format(backupProvider.lastBackupAt!);
 
             return Column(
               children: [
                 Container(
-                  color: Colors.white,
+                  color: _layerColor(context, 1),
                   child: SwitchListTile(
                     title: const Text('Enable server backup'),
                     value: backupProvider.enabled,
@@ -525,37 +592,48 @@ class _BackupSectionState extends State<_BackupSection> {
                   ),
                 ),
                 Container(
-                  color: Colors.white,
+                  color: _layerColor(context, 2),
                   child: ListTile(
-                    leading: const Icon(Icons.cloud_upload_outlined, color: Colors.black87),
+                    leading: Icon(
+                      Icons.cloud_upload_outlined,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     title: const Text('Backup endpoint'),
                     subtitle: Text(
                       backupProvider.serverUrl.isEmpty
                           ? 'Not configured'
                           : backupProvider.serverUrl,
                     ),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    trailing:
+                        const Icon(Icons.chevron_right, color: Colors.grey),
                     onTap: () => widget.onEditEndpoint(backupProvider),
                   ),
                 ),
                 Container(
-                  color: Colors.white,
+                  color: _layerColor(context, 2),
                   child: ListTile(
-                    leading: const Icon(Icons.history, color: Colors.black87),
+                    leading: Icon(
+                      Icons.history,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     title: const Text('Last backup'),
-                    subtitle: Text('$lastBackupText - ${backupProvider.lastBackupStatus}'),
+                    subtitle: Text(
+                        '$lastBackupText - ${backupProvider.lastBackupStatus}'),
                   ),
                 ),
                 Container(
                   width: double.infinity,
-                  color: Colors.white,
+                  color: _layerColor(context, 3),
                   padding: const EdgeInsets.all(16),
                   child: ElevatedButton.icon(
                     onPressed: backupProvider.isBackingUp
                         ? null
                         : () async {
-                            final ok = await localContext.read<BackupProvider>().backupNow(
-                                  userProvider: localContext.read<UserProfileProvider>(),
+                            final ok = await localContext
+                                .read<BackupProvider>()
+                                .backupNow(
+                                  userProvider:
+                                      localContext.read<UserProfileProvider>(),
                                   transactionProvider:
                                       localContext.read<TransactionProvider>(),
                                 );
@@ -632,9 +710,11 @@ class _LogoutSectionState extends State<_LogoutSection> {
             foregroundColor: Colors.red,
             side: const BorderSide(color: Colors.red),
             padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+          child: const Text('Logout',
+              style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
     );
@@ -648,16 +728,17 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           title.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: theme.colorScheme.onSurfaceVariant,
             letterSpacing: 1.1,
           ),
         ),
@@ -686,17 +767,22 @@ class _SettingTile extends StatefulWidget {
 class _SettingTileState extends State<_SettingTile> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: _layerColor(context, 2),
       child: ListTile(
-        leading: Icon(widget.icon, color: Colors.black87),
-        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        leading: Icon(widget.icon, color: theme.colorScheme.onSurfaceVariant),
+        title: Text(widget.title,
+            style: const TextStyle(fontWeight: FontWeight.w500)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (widget.trailingText != null)
-              Text(widget.trailingText!, style: const TextStyle(color: Colors.grey)),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+              Text(
+                widget.trailingText!,
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              ),
+            Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
           ],
         ),
         onTap: widget.onTap == null ? null : () => widget.onTap!(),
@@ -725,11 +811,13 @@ class _SettingSwitchTile extends StatefulWidget {
 class _SettingSwitchTileState extends State<_SettingSwitchTile> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Colors.white,
+      color: _layerColor(context, 2),
       child: SwitchListTile(
-        secondary: Icon(widget.icon, color: Colors.black87),
-        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        secondary: Icon(widget.icon, color: theme.colorScheme.onSurfaceVariant),
+        title: Text(widget.title,
+            style: const TextStyle(fontWeight: FontWeight.w500)),
         value: widget.value,
         onChanged: widget.onChanged,
       ),
@@ -738,7 +826,18 @@ class _SettingSwitchTileState extends State<_SettingSwitchTile> {
 }
 
 ImageProvider _avatarProvider(String avatar) {
-  final value = avatar.trim();
+  var value = avatar.trim();
+  if (value.startsWith('memory:')) {
+    final encoded = value.substring('memory:'.length);
+    try {
+      return MemoryImage(base64Decode(encoded));
+    } catch (_) {
+      return const AssetImage('assets/user/anonymous.jpg');
+    }
+  }
+  if (value.startsWith('file://')) {
+    value = Uri.parse(value).toFilePath();
+  }
   if (value.startsWith('http://') || value.startsWith('https://')) {
     return NetworkImage(value);
   }
@@ -749,7 +848,28 @@ ImageProvider _avatarProvider(String avatar) {
     return AssetImage(value);
   }
   if (!kIsWeb) {
+    if (!File(value).existsSync()) {
+      return const AssetImage('assets/user/anonymous.jpg');
+    }
     return FileImage(File(value));
   }
   return const AssetImage('assets/user/anonymous.jpg');
+}
+
+Color _layerColor(BuildContext context, int level) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  if (!isDark) {
+    return switch (level) {
+      0 => const Color(0xFFF8F9FA),
+      1 => Colors.white,
+      2 => const Color(0xFFFFFFFF),
+      _ => const Color(0xFFFFFFFF),
+    };
+  }
+  return switch (level) {
+    0 => const Color(0xFF000000),
+    1 => const Color(0xFF131313),
+    2 => const Color(0xFF1B1B1B),
+    _ => const Color(0xFF242424),
+  };
 }
