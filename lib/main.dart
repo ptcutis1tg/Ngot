@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_application_1/debug.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
 import 'package:flutter_application_1/firstscreen/onboarding_flow.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:flutter_application_1/reset.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -222,6 +222,7 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
         context.watch<AppSettingsProvider>().languageCode == 'vi';
 
     return Scaffold(
+      extendBody: true,
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
@@ -232,61 +233,75 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
         },
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onNavTap,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor:
-            Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.dashboard_outlined),
-            label: isVietnamese ? 'Trang chủ' : 'Dashboard',
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF032717),
+          border: Border(top: BorderSide(color: Color(0xFF0E5B3A), width: 1)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onNavTap,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: const Color(0xFF1CF07B),
+          unselectedItemColor: const Color(0xFF98A99F),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.7,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart_outlined),
-            label: isVietnamese ? 'Thống kê' : 'Statistics',
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.7,
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            label: isVietnamese ? 'Ví tiền' : 'Wallets',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings_outlined),
-            label: isVietnamese ? 'Cài đặt' : 'Settings',
-          ),
-        ],
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.home_rounded),
+              label: isVietnamese ? 'TRANG CHU' : 'HOME',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.bar_chart_rounded),
+              label: isVietnamese ? 'BAO CAO' : 'REPORT',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.account_balance_wallet_rounded),
+              label: isVietnamese ? 'NGAN QUY' : 'WALLET',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.settings_rounded),
+              label: isVietnamese ? 'CAI DAT' : 'SETTINGS',
+            ),
+          ],
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Container(
-        margin: EdgeInsets.zero,
-        child: RawMaterialButton(
-          onPressed: () {
-            showDialog<void>(
-              context: context,
-              barrierDismissible: true,
-              builder: (dialogContext) => Dialog(
-                backgroundColor: Colors.transparent,
-                insetPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                child: AddTransactionWidget(
-                  onAdd: (TransactionProfile tx) {
-                    context.read<TransactionProvider>().addTransaction(tx);
-                  },
-                  onClose: () => Navigator.of(dialogContext).pop(),
-                ),
+      floatingActionButton: RawMaterialButton(
+        onPressed: () {
+          showDialog<void>(
+            context: context,
+            barrierDismissible: true,
+            builder: (dialogContext) => Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.zero,
+              elevation: 0,
+              child: AddTransactionWidget(
+                onAdd: (TransactionProfile tx) {
+                  context.read<TransactionProvider>().addTransaction(tx);
+                },
+                onClose: () => Navigator.of(dialogContext).pop(),
               ),
-            );
-          },
-          fillColor: Theme.of(context).colorScheme.primary,
-          shape: const CircleBorder(),
-          elevation: 6,
-          constraints: const BoxConstraints.tightFor(width: 64, height: 64),
-          child: const Icon(Icons.add, size: 32, color: Colors.white),
-        ),
+            ),
+          );
+        },
+        fillColor: const Color(0xFF1CF07B),
+        shape: const CircleBorder(),
+        elevation: 8,
+        constraints: const BoxConstraints.tightFor(width: 78, height: 78),
+        child: const Icon(Icons.add, size: 44, color: Color(0xFF002A17)),
       ),
     );
   }
