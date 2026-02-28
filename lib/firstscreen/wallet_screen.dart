@@ -20,12 +20,7 @@ class _WalletAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: const Text('My Wallets'),
-      actions: [
-        IconButton(icon: const Icon(Icons.add_card), onPressed: () {}),
-      ],
-    );
+    return AppBar(title: const Text('My Wallet'));
   }
 
   @override
@@ -73,7 +68,7 @@ class _WalletBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Your Cards',
+            'Wallet Overview',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 15),
@@ -86,7 +81,7 @@ class _WalletBody extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           const Text(
-            'Account Details',
+            'Wallet Summary',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 15),
@@ -162,9 +157,9 @@ class _CardPagerState extends State<_CardPager> {
             color: const Color(0xFF2ECC71),
           ),
           _WalletCard(
-            label: 'This Month Net',
+            label: 'Monthly Net',
             amount: widget.monthlyNetText,
-            subtitle: 'Income ${widget.monthIncomeText}',
+            subtitle: 'This month income ${widget.monthIncomeText}',
             color: const Color(0xFF2C3E50),
           ),
         ],

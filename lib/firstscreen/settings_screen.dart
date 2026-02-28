@@ -55,7 +55,6 @@ class _SettingsBodyState extends State<_SettingsBody> {
           const _SectionTitle('Account Settings'),
           _AccountSection(
             onEditPersonal: _openPersonalInformationEditor,
-            onOpenBankAccounts: _showBankAccountsDialog,
             onOpenCurrency: _showCurrencyDialog,
             onOpenLanguage: _showLanguageDialog,
           ),
@@ -274,60 +273,6 @@ class _SettingsBodyState extends State<_SettingsBody> {
     );
   }
 
-  Future<void> _showBankAccountsDialog(AppSettingsProvider appSettings) async {
-    int count = appSettings.bankAccountsCount;
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            return AlertDialog(
-              title: const Text('Bank accounts'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Linked accounts: $count'),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: count > 0
-                            ? () => setDialogState(() => count--)
-                            : null,
-                        icon: const Icon(Icons.remove_circle_outline),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => setDialogState(() => count++),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add account'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Close'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await appSettings.setBankAccountsCount(count);
-                    if (!dialogContext.mounted) return;
-                    Navigator.of(dialogContext).pop();
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _showHelpDialog() async {
     await showDialog<void>(
       context: context,
@@ -420,13 +365,11 @@ class _ProfileHeaderState extends State<_ProfileHeader> {
 
 class _AccountSection extends StatefulWidget {
   final Future<void> Function() onEditPersonal;
-  final Future<void> Function(AppSettingsProvider) onOpenBankAccounts;
   final Future<void> Function(CurrencyProvider) onOpenCurrency;
   final Future<void> Function(AppSettingsProvider) onOpenLanguage;
 
   const _AccountSection({
     required this.onEditPersonal,
-    required this.onOpenBankAccounts,
     required this.onOpenCurrency,
     required this.onOpenLanguage,
   });
@@ -445,14 +388,6 @@ class _AccountSectionState extends State<_AccountSection> {
           title: 'Personal information',
           trailingText: null,
           onTap: widget.onEditPersonal,
-        ),
-        Consumer<AppSettingsProvider>(
-          builder: (context, appSettings, _) => _SettingTile(
-            icon: Icons.account_balance_outlined,
-            title: 'Bank accounts',
-            trailingText: '${appSettings.bankAccountsCount} linked',
-            onTap: () => widget.onOpenBankAccounts(appSettings),
-          ),
         ),
         Consumer<CurrencyProvider>(
           builder: (context, currencyProvider, _) => _SettingTile(

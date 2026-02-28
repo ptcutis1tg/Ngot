@@ -5,7 +5,6 @@ class AppSettingsProvider extends ChangeNotifier {
   static const String _darkModeKey = 'settings_dark_mode';
   static const String _notificationsKey = 'settings_notifications';
   static const String _biometricKey = 'settings_biometric';
-  static const String _bankAccountsKey = 'settings_bank_accounts_count';
   static const String _passwordKey = 'settings_app_password';
   static const String _languageCodeKey = 'settings_language_code';
 
@@ -16,14 +15,12 @@ class AppSettingsProvider extends ChangeNotifier {
   bool _darkMode = false;
   bool _notificationsEnabled = true;
   bool _biometricEnabled = false;
-  int _bankAccountsCount = 0;
   String _password = '';
   String _languageCode = 'vi';
 
   bool get darkMode => _darkMode;
   bool get notificationsEnabled => _notificationsEnabled;
   bool get biometricEnabled => _biometricEnabled;
-  int get bankAccountsCount => _bankAccountsCount;
   String get languageCode => _languageCode;
   Locale get locale => Locale(_languageCode);
 
@@ -34,7 +31,6 @@ class AppSettingsProvider extends ChangeNotifier {
     _darkMode = prefs.getBool(_darkModeKey) ?? false;
     _notificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
     _biometricEnabled = prefs.getBool(_biometricKey) ?? false;
-    _bankAccountsCount = prefs.getInt(_bankAccountsKey) ?? 0;
     _password = prefs.getString(_passwordKey) ?? '';
     _languageCode = prefs.getString(_languageCodeKey) ?? 'vi';
     _loaded = true;
@@ -65,16 +61,6 @@ class AppSettingsProvider extends ChangeNotifier {
     _biometricEnabled = value;
     final prefs = await _prefsFuture;
     await prefs.setBool(_biometricKey, value);
-    notifyListeners();
-  }
-
-  Future<void> setBankAccountsCount(int value) async {
-    final next = value < 0 ? 0 : value;
-    if (_bankAccountsCount == next) return;
-
-    _bankAccountsCount = next;
-    final prefs = await _prefsFuture;
-    await prefs.setInt(_bankAccountsKey, _bankAccountsCount);
     notifyListeners();
   }
 

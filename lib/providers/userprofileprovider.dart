@@ -22,7 +22,10 @@ class UserProfileProvider extends ChangeNotifier {
     final prefs = await _prefsFuture;
     final nextName = prefs.getString(_userNameKey) ?? '';
     final nextEmail = prefs.getString(_userEmailKey) ?? '';
-    final nextAvatar = prefs.getString(_userAvatarKey) ?? _defaultAvatar;
+    final storedAvatar = prefs.getString(_userAvatarKey);
+    final nextAvatar = (storedAvatar == null || storedAvatar.trim().isEmpty)
+        ? _defaultAvatar
+        : storedAvatar.trim();
 
     if (_userName == nextName &&
         _userEmail == nextEmail &&
