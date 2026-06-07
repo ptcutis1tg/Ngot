@@ -14,16 +14,25 @@ import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:flutter_application_1/reset.dart';
+import 'package:flutter_application_1/supabase_config.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 const bool resetAppData = false;
 const bool resetOnboardingFlowOnly = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  SupabaseConfig.validate();
+
+  await Supabase.initialize(
+    url: SupabaseConfig.url,
+    publishableKey: SupabaseConfig.publishableKey,
+  );
 
   if (kDebugMode) {
     DebugHelper.printAllData();

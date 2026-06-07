@@ -14,19 +14,22 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF031F16),
-              Color(0xFF052E1F),
-            ],
+    return const Scaffold(
+      backgroundColor: Color(0xFF052E1F),
+      body: SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF031F16),
+                Color(0xFF052E1F),
+              ],
+            ),
           ),
+          child: SafeArea(child: _DashboardBody()),
         ),
-        child: const SafeArea(child: _DashboardBody()),
       ),
     );
   }
@@ -37,19 +40,19 @@ class _DashboardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+    return const SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _TopBar(),
-          const SizedBox(height: 32),
+          _TopBar(),
+          SizedBox(height: 32),
           _ProfileSection(),
-          const SizedBox(height: 26),
+          SizedBox(height: 26),
           _BalanceCard(),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
           _RecentHeader(),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _RecentList(),
         ],
       ),
@@ -125,7 +128,8 @@ class _ProfileSection extends StatelessWidget {
               Consumer2<TransactionProvider, CurrencyProvider>(
                 builder: (context, txProvider, currencyProvider, _) {
                   return Text(
-                    currencyProvider.numberFormat.format(txProvider.totalBalance),
+                    currencyProvider.numberFormat
+                        .format(txProvider.totalBalance),
                     style: const TextStyle(
                       fontSize: 62,
                       fontWeight: FontWeight.w800,
@@ -332,7 +336,9 @@ String _formatGroupHeading(DateTime day, DateTime now, bool isVietnamese) {
 
 _TxVisualMeta _txMeta(String title, bool isIncome, bool isVietnamese) {
   final lower = title.toLowerCase();
-  if (lower.contains('ăn') || lower.contains('trưa') || lower.contains('food')) {
+  if (lower.contains('ăn') ||
+      lower.contains('trưa') ||
+      lower.contains('food')) {
     return _TxVisualMeta(
       icon: Icons.restaurant,
       iconBg: const Color(0xFF4F3A11),
@@ -405,15 +411,20 @@ class _RecentHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          isVietnamese ? 'Lịch sử giao dịch' : 'Transaction History',
-          style: const TextStyle(
-            fontSize: 38,
-            color: Color(0xFFE9F5EE),
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.8,
+        Expanded(
+          child: Text(
+            isVietnamese ? 'Lịch sử giao dịch' : 'Transaction History',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 38,
+              color: Color(0xFFE9F5EE),
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.8,
+            ),
           ),
         ),
+        const SizedBox(width: 16),
         TextButton(
           onPressed: () {},
           child: Text(
@@ -533,8 +544,9 @@ class _TransactionGroupSection extends StatelessWidget {
                 amount: amountText,
                 iconBg: meta.iconBg,
                 iconColor: meta.iconColor,
-                amountColor:
-                    isIncome ? const Color(0xFF27EC79) : const Color(0xFFFF4A73),
+                amountColor: isIncome
+                    ? const Color(0xFF27EC79)
+                    : const Color(0xFFFF4A73),
               );
             }).toList(),
           ),

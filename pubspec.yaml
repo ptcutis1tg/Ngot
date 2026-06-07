@@ -17,12 +17,14 @@ dependencies:
   fl_chart: ^0.66.0
   intl: ^0.20.2
   provider: ^6.1.5+1
+  crypto: ^3.0.7
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   shared_preferences: ^2.5.4
   file_picker: ^8.1.2
   path_provider: ^2.1.4
   crop_your_image: ^1.1.0
+  supabase_flutter: ^2.14.1
 
 dev_dependencies:
   flutter_test:
@@ -37,4 +39,3 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/user/
-
