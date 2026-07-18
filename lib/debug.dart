@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DebugHelper {
@@ -6,17 +7,17 @@ class DebugHelper {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys();
 
-    print('========== ALL SAVED DATA ==========');
+    debugPrint('========== ALL SAVED DATA ==========');
     for (String key in keys) {
-      print('$key: ${prefs.get(key)}');
+      debugPrint('$key: ${prefs.get(key)}');
     }
-    print('====================================');
+    debugPrint('====================================');
   }
 
   // Xóa tất cả dữ liệu (Reset)
   static Future<void> clearAllData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    print('✅ All data cleared!');
+    debugPrint('✅ All data cleared!');
   }
 }

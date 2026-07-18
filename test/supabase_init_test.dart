@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/supabase_config.dart';
@@ -8,19 +9,19 @@ void main() {
     // Mock SharedPreferences
     SharedPreferences.setMockInitialValues({});
 
-    print('URL: ${SupabaseConfig.url}');
-    print('Key: ${SupabaseConfig.publishableKey}');
+    debugPrint('URL: ${SupabaseConfig.url}');
+    debugPrint('Key: ${SupabaseConfig.publishableKey}');
     
     try {
       SupabaseConfig.validate();
       await Supabase.initialize(
         url: SupabaseConfig.url,
-        anonKey: SupabaseConfig.publishableKey,
+        publishableKey: SupabaseConfig.publishableKey,
       );
-      print('Supabase initialized successfully!');
+      debugPrint('Supabase initialized successfully!');
     } catch (e, stack) {
-      print('Initialization failed: $e');
-      print(stack);
+      debugPrint('Initialization failed: $e');
+      debugPrint(stack.toString());
       rethrow;
     }
   });

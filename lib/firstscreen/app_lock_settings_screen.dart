@@ -96,7 +96,7 @@ class _AppLockSettingsScreenState extends State<AppLockSettingsScreen> {
     if (password.contains(RegExp(r'[0-9]'))) strength++;
     if (password.contains(RegExp(r'[a-zA-Z]'))) strength++;
 
-    Color color = Colors.grey.withOpacity(0.3);
+    Color color = Colors.grey.withValues(alpha: 0.3);
     String text = '';
     double widthFactor = 0.0;
 
@@ -127,7 +127,7 @@ class _AppLockSettingsScreenState extends State<AppLockSettingsScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: widthFactor,
-                  backgroundColor: Colors.grey.withOpacity(0.2),
+                  backgroundColor: Colors.grey.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                   minHeight: 6,
                 ),

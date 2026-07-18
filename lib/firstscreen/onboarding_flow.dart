@@ -420,7 +420,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 return Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF2ECC71).withOpacity(0.12),
+                      backgroundColor: const Color(0xFF2ECC71).withValues(alpha: 0.12),
                       child: Text('${index + 1}'),
                     ),
                     title: Text(feature.$1),
