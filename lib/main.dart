@@ -15,6 +15,7 @@ import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:flutter_application_1/reset.dart';
 import 'package:flutter_application_1/supabase_config.dart';
+import 'package:flutter_application_1/router/app_router.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,6 +37,7 @@ void main() async {
       url: SupabaseConfig.url,
       publishableKey: SupabaseConfig.publishableKey,
     );
+    AppRouter.initializeAuthListener();
   } catch (e) {
     runApp(MaterialApp(
       home: Scaffold(
@@ -104,7 +106,7 @@ class DailyExpenseApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final appSettings = context.watch<AppSettingsProvider>();
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Daily Expense Diary',
       debugShowCheckedModeBanner: false,
       themeMode: appSettings.darkMode ? ThemeMode.dark : ThemeMode.light,
@@ -187,7 +189,7 @@ class DailyExpenseApp extends StatelessWidget {
           displayColor: Colors.white,
         ),
       ),
-      home: const AppLaunchGate(child: MainNavigationScreen()),
+      routerConfig: AppRouter.router,
     );
   }
 }
