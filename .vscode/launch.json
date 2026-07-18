@@ -2,6 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Flutter (with .env)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "--dart-define-from-file=.env"
+      ]
+    },
+    {
       "name": "Flutter Windows Debug (with .env)",
       "request": "launch",
       "type": "dart",
