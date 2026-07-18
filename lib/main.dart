@@ -27,12 +27,30 @@ const bool resetOnboardingFlowOnly = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SupabaseConfig.validate();
+  try {
+    SupabaseConfig.validate();
 
-  await Supabase.initialize(
-    url: SupabaseConfig.url,
-    publishableKey: SupabaseConfig.publishableKey,
-  );
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      publishableKey: SupabaseConfig.publishableKey,
+    );
+  } catch (e) {
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Text(
+              'Lỗi khởi tạo Supabase: $e\n\nVui lòng đảm bảo bạn đã cấu hình file .env và chạy app với cờ --dart-define-from-file=.env',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red, fontSize: 16),
+            ),
+          ),
+        ),
+      ),
+    ));
+    return;
+  }
 
   if (kDebugMode) {
     DebugHelper.printAllData();
@@ -67,6 +85,8 @@ Future<void> initializeUserProfile() async {
   await prefs.setString('userName', '');
   await prefs.setString('userEmail', '');
   await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
+  await prefs.setString('userFullName', '');
+  await prefs.setString('userBio', '');
 }
 
 Future<void> resetOnboardingIfNeeded() async {
@@ -121,15 +141,15 @@ class DailyExpenseApp extends StatelessWidget {
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF2ECC71),
           secondary: Color(0xFF27AE60),
-          surface: Color(0xFF121212),
+          surface: Color(0xFF0C3827),
           onSurface: Colors.white,
         ),
-        scaffoldBackgroundColor: const Color(0xFF000000),
-        canvasColor: const Color(0xFF000000),
-        cardColor: const Color(0xFF1B1B1B),
-        dividerColor: const Color(0xFF2A2A2A),
+        scaffoldBackgroundColor: const Color(0xFF031F16),
+        canvasColor: const Color(0xFF031F16),
+        cardColor: const Color(0xFF0C3827),
+        dividerColor: const Color(0xFF11653F),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF000000),
+          backgroundColor: Color(0xFF031F16),
           foregroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
@@ -141,20 +161,20 @@ class DailyExpenseApp extends StatelessWidget {
           ),
         ),
         listTileTheme: const ListTileThemeData(
-          tileColor: Color(0xFF1B1B1B),
+          tileColor: Color(0xFF0C3827),
           iconColor: Colors.white70,
           textColor: Colors.white,
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF101010),
-          selectedItemColor: Color(0xFF2ECC71),
-          unselectedItemColor: Colors.white70,
-          selectedIconTheme: IconThemeData(color: Color(0xFF2ECC71)),
-          unselectedIconTheme: IconThemeData(color: Colors.white70),
+          backgroundColor: Color(0xFF032717),
+          selectedItemColor: Color(0xFF1CF07B),
+          unselectedItemColor: Color(0xFF98A99F),
+          selectedIconTheme: IconThemeData(color: Color(0xFF1CF07B)),
+          unselectedIconTheme: IconThemeData(color: Color(0xFF98A99F)),
           type: BottomNavigationBarType.fixed,
         ),
         dialogTheme: const DialogThemeData(
-          backgroundColor: Color(0xFF1E1E1E),
+          backgroundColor: Color(0xFF0C3827),
           titleTextStyle: TextStyle(color: Colors.white),
           contentTextStyle: TextStyle(color: Colors.white70),
         ),

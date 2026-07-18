@@ -18,7 +18,7 @@ class AppSettingsProvider extends ChangeNotifier {
       SharedPreferences.getInstance();
 
   bool _loaded = false;
-  bool _darkMode = false;
+  bool _darkMode = true;
   bool _notificationsEnabled = true;
   bool _biometricEnabled = false;
   String _passwordHash = '';
@@ -29,12 +29,13 @@ class AppSettingsProvider extends ChangeNotifier {
   bool get biometricEnabled => _biometricEnabled;
   String get languageCode => _languageCode;
   Locale get locale => Locale(_languageCode);
+  bool get hasPassword => _passwordHash.isNotEmpty;
 
   Future<void> loadSettings() async {
     if (_loaded) return;
 
     final prefs = await _prefsFuture;
-    _darkMode = prefs.getBool(_darkModeKey) ?? false;
+    _darkMode = prefs.getBool(_darkModeKey) ?? true;
     _notificationsEnabled = prefs.getBool(_notificationsKey) ?? true;
     _biometricEnabled = prefs.getBool(_biometricKey) ?? false;
     _passwordHash = prefs.getString(_passwordHashKey) ?? '';

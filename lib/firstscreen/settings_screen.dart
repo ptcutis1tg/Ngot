@@ -3,7 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/firstscreen/widget/settings/personal_information_editor.dart';
+import 'package:flutter_application_1/firstscreen/app_lock_settings_screen.dart';
+import 'package:flutter_application_1/firstscreen/personal_information_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
@@ -59,7 +60,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
             onOpenLanguage: _showLanguageDialog,
           ),
           const SizedBox(height: 20),
-          _SecuritySection(onChangePassword: _showChangePasswordDialog),
+          const _SecuritySection(),
           const SizedBox(height: 20),
           _SupportSection(
             onHelp: _showHelpDialog,
@@ -76,11 +77,11 @@ class _SettingsBodyState extends State<_SettingsBody> {
   }
 
   Future<void> _openPersonalInformationEditor() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const PersonalInformationEditor(),
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PersonalInformationScreen(),
+      ),
     );
   }
 
@@ -204,74 +205,6 @@ class _SettingsBodyState extends State<_SettingsBody> {
     );
   }
 
-  Future<void> _showChangePasswordDialog() async {
-    final currentController = TextEditingController();
-    final newController = TextEditingController();
-    final confirmController = TextEditingController();
-
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Change password'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: currentController,
-                obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Current password'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: newController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'New password'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: confirmController,
-                obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Confirm password'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final appSettings = context.read<AppSettingsProvider>();
-                final error = await appSettings.changePassword(
-                  currentPassword: currentController.text,
-                  newPassword: newController.text,
-                  confirmPassword: confirmController.text,
-                );
-                if (!dialogContext.mounted) return;
-                if (!mounted) return;
-                if (error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(error)),
-                  );
-                  return;
-                }
-                Navigator.of(dialogContext).pop();
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password updated')),
-                );
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> _showHelpDialog() async {
     await showDialog<void>(
@@ -413,9 +346,7 @@ class _AccountSectionState extends State<_AccountSection> {
 }
 
 class _SecuritySection extends StatefulWidget {
-  final Future<void> Function() onChangePassword;
-
-  const _SecuritySection({required this.onChangePassword});
+  const _SecuritySection();
 
   @override
   State<_SecuritySection> createState() => _SecuritySectionState();
@@ -429,9 +360,15 @@ class _SecuritySectionState extends State<_SecuritySection> {
         const _SectionTitle('Security & App'),
         _SettingTile(
           icon: Icons.lock_outline,
-          title: 'Change password',
+          title: 'Mã khoá ứng dụng',
           trailingText: null,
-          onTap: widget.onChangePassword,
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const AppLockSettingsScreen(),
+              ),
+            );
+          },
         ),
         const _SettingTile(
           icon: Icons.fingerprint,
@@ -802,9 +739,9 @@ Color _layerColor(BuildContext context, int level) {
     };
   }
   return switch (level) {
-    0 => const Color(0xFF000000),
-    1 => const Color(0xFF131313),
-    2 => const Color(0xFF1B1B1B),
-    _ => const Color(0xFF242424),
+    0 => const Color(0xFF031F16),
+    1 => const Color(0xFF052E1F),
+    2 => const Color(0xFF0C3827),
+    _ => const Color(0xFF104A33),
   };
 }

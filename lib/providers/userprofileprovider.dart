@@ -5,6 +5,8 @@ class UserProfileProvider extends ChangeNotifier {
   static const String _userNameKey = 'userName';
   static const String _userEmailKey = 'userEmail';
   static const String _userAvatarKey = 'userAvatar';
+  static const String _userFullNameKey = 'userFullName';
+  static const String _userBioKey = 'userBio';
   static const String _defaultAvatar = 'assets/user/anonymous.jpg';
 
   final Future<SharedPreferences> _prefsFuture =
@@ -13,10 +15,14 @@ class UserProfileProvider extends ChangeNotifier {
   String _userName = '';
   String _userEmail = '';
   String _userAvatar = _defaultAvatar;
+  String _userFullName = '';
+  String _userBio = '';
 
   String get userName => _userName;
   String get userEmail => _userEmail;
   String get userAvatar => _userAvatar;
+  String get userFullName => _userFullName;
+  String get userBio => _userBio;
 
   Future<void> loadProfile() async {
     final prefs = await _prefsFuture;
@@ -26,16 +32,22 @@ class UserProfileProvider extends ChangeNotifier {
     final nextAvatar = (storedAvatar == null || storedAvatar.trim().isEmpty)
         ? _defaultAvatar
         : storedAvatar.trim();
+    final nextFullName = prefs.getString(_userFullNameKey) ?? '';
+    final nextBio = prefs.getString(_userBioKey) ?? '';
 
     if (_userName == nextName &&
         _userEmail == nextEmail &&
-        _userAvatar == nextAvatar) {
+        _userAvatar == nextAvatar &&
+        _userFullName == nextFullName &&
+        _userBio == nextBio) {
       return;
     }
 
     _userName = nextName;
     _userEmail = nextEmail;
     _userAvatar = nextAvatar;
+    _userFullName = nextFullName;
+    _userBio = nextBio;
     notifyListeners();
   }
 
@@ -66,6 +78,26 @@ class UserProfileProvider extends ChangeNotifier {
     _userAvatar = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_userAvatarKey, next);
+    notifyListeners();
+  }
+
+  Future<void> setUserFullName(String fullName) async {
+    final next = fullName.trim();
+    if (_userFullName == next) return;
+
+    _userFullName = next;
+    final prefs = await _prefsFuture;
+    await prefs.setString(_userFullNameKey, next);
+    notifyListeners();
+  }
+
+  Future<void> setUserBio(String bio) async {
+    final next = bio.trim();
+    if (_userBio == next) return;
+
+    _userBio = next;
+    final prefs = await _prefsFuture;
+    await prefs.setString(_userBioKey, next);
     notifyListeners();
   }
 }

@@ -8,6 +8,7 @@ import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -67,33 +68,52 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
+        final email = Supabase.instance.client.auth.currentUser?.email ?? 'Guest';
         return Row(
           children: [
             Container(
-              width: 58,
-              height: 58,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 color: const Color(0xFF0C3A29),
-                borderRadius: BorderRadius.circular(29),
+                borderRadius: BorderRadius.circular(25),
               ),
-              child: const Icon(Icons.menu, color: Color(0xFF1CF07B), size: 30),
+              child: const Icon(Icons.menu, color: Color(0xFF1CF07B), size: 26),
             ),
             const Spacer(),
-            const Text(
-              'Real-time Ledger',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFE5F4EB),
-                letterSpacing: -0.5,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  'Real-time Ledger',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFE5F4EB),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                Text(
+                  email,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF1CF07B),
+                  ),
+                ),
+              ],
             ),
             const Spacer(),
-            CircleAvatar(
-              key: ValueKey<String>(userProfile.userAvatar),
-              radius: 29,
-              backgroundColor: const Color(0xFF244A3A),
-              backgroundImage: _avatarProvider(userProfile.userAvatar),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A1515),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white70),
+                onPressed: () {
+                  Supabase.instance.client.auth.signOut();
+                },
+              ),
             ),
           ],
         );
