@@ -15,6 +15,7 @@ import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:flutter_application_1/reset.dart';
 import 'package:flutter_application_1/supabase_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    await dotenv.load(fileName: ".env");
     SupabaseConfig.validate();
 
     await Supabase.initialize(

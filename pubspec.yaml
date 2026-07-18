@@ -25,6 +25,7 @@ dependencies:
   path_provider: ^2.1.4
   crop_your_image: ^1.1.0
   supabase_flutter: ^2.14.1
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -39,3 +40,4 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/user/
+    - .env
