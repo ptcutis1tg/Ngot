@@ -4,6 +4,7 @@ import 'package:flutter_application_1/firstscreen/pin_lock_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:flutter_application_1/providers/pin_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,6 +22,7 @@ class _AppLaunchGateState extends State<AppLaunchGate>
     with WidgetsBindingObserver {
   bool _isLoading = true;
   bool _completedOnboarding = false;
+  bool _isUnlocked = false;
   StreamSubscription<AuthState>? _authSubscription;
 
   @override
@@ -45,13 +47,8 @@ class _AppLaunchGateState extends State<AppLaunchGate>
 
   @override
   void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _authSubscription?.cancel();
     super.dispose();
   }
 

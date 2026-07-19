@@ -206,6 +206,7 @@ class _PersonalInformationScreenBodyState
     final appSettings = context.watch<AppSettingsProvider>();
     final userProfile = context.watch<UserProfileProvider>();
     final languageCode = appSettings.languageCode;
+    final isVietnamese = languageCode == 'vi';
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Theme colors matching the premium look of the app
