@@ -94,7 +94,11 @@ class TransactionProvider extends ChangeNotifier {
     
     // 3. Load existing records
     final store = intMapStoreFactory.store(_storeName);
-    final records = await store.find(_db);
+    final finder = Finder(
+      sortOrders: [SortOrder('time', false)],
+      limit: 500,
+    );
+    final records = await store.find(_db, finder: finder);
     
     _transactions.clear();
     for (var record in records) {
