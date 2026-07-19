@@ -182,8 +182,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (otp.isEmpty || otp.length != 6) {
-      _showError('Vui lòng nhập mã OTP 6 số');
+    if (otp.isEmpty || otp.length < 6) {
+      _showError('Vui lòng nhập mã OTP hợp lệ');
       return;
     }
     if (newPassword.isEmpty || newPassword.length < 6) {
@@ -462,14 +462,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Nhập mã 6 số vừa được gửi đến ${_emailController.text}',
+            'Nhập mã OTP vừa được gửi đến ${_emailController.text}',
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 32),
           TextField(
             controller: _otpController,
             keyboardType: TextInputType.number,
-            maxLength: 6,
+            maxLength: 8,
             decoration: const InputDecoration(
               labelText: 'Mã xác nhận (OTP)',
               border: OutlineInputBorder(),
