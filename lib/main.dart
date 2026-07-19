@@ -22,7 +22,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:flutter_application_1/services/sync_service.dart';
 const bool resetAppData = false;
 const bool resetOnboardingFlowOnly = false;
 
@@ -267,7 +267,9 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProfileProvider>().loadProfile();
-      context.read<TransactionProvider>().loadTransactions();
+      context.read<TransactionProvider>().loadTransactions().then((_) {
+        SyncService().syncTransactions(context.read<TransactionProvider>());
+      });
       context.read<BackupProvider>().loadConfig();
       context.read<CurrencyProvider>().loadCurrency();
     });
