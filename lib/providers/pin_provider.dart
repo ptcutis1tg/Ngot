@@ -113,6 +113,12 @@ class PinProvider extends ChangeNotifier {
     }
   }
 
+  bool verifyPin(String pin) {
+    final metadata = auth.userMetadata;
+    final pinRecord = metadata?['pin'];
+    return codec.verify(pin, pinRecord);
+  }
+
   Future<String?> sendRecoveryEmail() async {
     final email = auth.email;
     if (email == null || email.isEmpty) {

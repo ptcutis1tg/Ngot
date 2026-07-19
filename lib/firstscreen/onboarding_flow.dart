@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/firstscreen/pin_lock_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/pin_provider.dart';
 import 'package:provider/provider.dart';
@@ -14,14 +15,31 @@ class AppLaunchGate extends StatefulWidget {
   State<AppLaunchGate> createState() => _AppLaunchGateState();
 }
 
-class _AppLaunchGateState extends State<AppLaunchGate> {
+class _AppLaunchGateState extends State<AppLaunchGate>
+    with WidgetsBindingObserver {
   bool _isLoading = true;
   bool _completedOnboarding = false;
+  bool _isUnlocked = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadOnboardingStatus();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      setState(() => _isUnlocked = false);
+    }
   }
 
   Future<void> _loadOnboardingStatus() async {
@@ -41,6 +59,10 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
     setState(() => _completedOnboarding = true);
   }
 
+  void _onPinUnlocked() {
+    setState(() => _isUnlocked = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -56,6 +78,10 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
         final isLoggedIn = session != null;
 
         if (isLoggedIn && _completedOnboarding) {
+          final pinProvider = context.watch<PinProvider>();
+          if (pinProvider.hasPin && !_isUnlocked) {
+            return PinLockScreen(onUnlocked: _onPinUnlocked);
+          }
           return widget.child;
         }
 
