@@ -277,7 +277,7 @@ class _ChartSectionState extends State<_ChartSection> {
                     style: TextStyle(color: onSurface.withValues(alpha: 0.8)),
                   ),
                 )
-              : LineChart(_lineDataFromBuckets(widget.buckets)),
+              : RepaintBoundary(child: LineChart(_lineDataFromBuckets(widget.buckets))),
         ),
       ],
     );
