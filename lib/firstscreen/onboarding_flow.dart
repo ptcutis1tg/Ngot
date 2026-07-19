@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -286,21 +287,20 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Widget _buildLanguageStep() {
-    final isVietnamese = _selectedLanguageCode == 'vi';
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
-          const Text(
-            'Choose language',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          Text(
+            AppTranslations.getText(_selectedLanguageCode, 'ob_choose_language'),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Chọn ngôn ngữ để tiếp tục',
-            style: TextStyle(fontSize: 16),
+          Text(
+            AppTranslations.getText(_selectedLanguageCode, 'ob_choose_language_sub'),
+            style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 20),
           RadioListTile<String>(
@@ -321,12 +321,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
               setState(() => _selectedLanguageCode = value);
             },
           ),
+          RadioListTile<String>(
+            value: 'ko',
+            groupValue: _selectedLanguageCode,
+            title: const Text('한국어'),
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() => _selectedLanguageCode = value);
+            },
+          ),
           const Spacer(),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _applyLanguageAndContinue,
-              child: Text(isVietnamese ? 'Tiếp tục' : 'Continue'),
+              child: Text(AppTranslations.getText(_selectedLanguageCode, 'ob_continue')),
             ),
           ),
         ],
@@ -343,21 +352,21 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         children: [
           const Icon(Icons.auto_graph, size: 64, color: Color(0xFF2ECC71)),
           const SizedBox(height: 24),
-          const Text(
-            'Getting Started',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+          Text(
+            AppTranslations.getText(_selectedLanguageCode, 'ob_getting_started'),
+            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Theo dõi chi tiêu hàng ngày, quản lý ví tiền và xem thống kê nhanh trong một ứng dụng.',
-            style: TextStyle(fontSize: 16, height: 1.5),
+          Text(
+            AppTranslations.getText(_selectedLanguageCode, 'ob_getting_started_sub'),
+            style: const TextStyle(fontSize: 16, height: 1.5),
           ),
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () => setState(() => _step = 2),
-              child: const Text('Bắt đầu'),
+              child: Text(AppTranslations.getText(_selectedLanguageCode, 'ob_start')),
             ),
           ),
         ],
@@ -374,25 +383,27 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           const SizedBox(height: 24),
           Text(
             _isForgotPasswordView
-                ? 'Quên mật khẩu'
-                : (_isLoginView ? 'Đăng nhập' : 'Đăng ký'),
+                ? AppTranslations.getText(_selectedLanguageCode, 'ob_forgot_pw')
+                : (_isLoginView 
+                    ? AppTranslations.getText(_selectedLanguageCode, 'ob_login') 
+                    : AppTranslations.getText(_selectedLanguageCode, 'ob_register')),
             style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Text(
             _isForgotPasswordView
-                ? 'Nhập email để nhận liên kết khôi phục.'
-                : 'Vui lòng điền thông tin bên dưới.',
+                ? AppTranslations.getText(_selectedLanguageCode, 'ob_forgot_pw_sub')
+                : AppTranslations.getText(_selectedLanguageCode, 'ob_auth_sub'),
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 32),
           TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.email),
+            decoration: InputDecoration(
+              labelText: AppTranslations.getText(_selectedLanguageCode, 'ob_email'),
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.email),
             ),
           ),
           if (!_isForgotPasswordView) ...[
@@ -400,10 +411,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Mật khẩu',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
+              decoration: InputDecoration(
+                labelText: AppTranslations.getText(_selectedLanguageCode, 'ob_password'),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.lock),
               ),
             ),
           ],
@@ -424,8 +435,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                     )
                   : Text(_isForgotPasswordView
-                      ? 'Gửi Email'
-                      : (_isLoginView ? 'Đăng nhập' : 'Đăng ký')),
+                      ? AppTranslations.getText(_selectedLanguageCode, 'ob_submit_email')
+                      : (_isLoginView 
+                          ? AppTranslations.getText(_selectedLanguageCode, 'ob_login') 
+                          : AppTranslations.getText(_selectedLanguageCode, 'ob_register'))),
             ),
           ),
           const SizedBox(height: 16),
@@ -433,12 +446,16 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(_isLoginView ? 'Chưa có tài khoản?' : 'Đã có tài khoản?'),
+                Text(_isLoginView 
+                    ? AppTranslations.getText(_selectedLanguageCode, 'ob_no_account') 
+                    : AppTranslations.getText(_selectedLanguageCode, 'ob_have_account')),
                 TextButton(
                   onPressed: () {
                     setState(() => _isLoginView = !_isLoginView);
                   },
-                  child: Text(_isLoginView ? 'Đăng ký ngay' : 'Đăng nhập'),
+                  child: Text(_isLoginView 
+                      ? AppTranslations.getText(_selectedLanguageCode, 'ob_register_now') 
+                      : AppTranslations.getText(_selectedLanguageCode, 'ob_login')),
                 ),
               ],
             ),
@@ -447,7 +464,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 onPressed: () {
                   setState(() => _isForgotPasswordView = true);
                 },
-                child: const Text('Quên mật khẩu?'),
+                child: Text(AppTranslations.getText(_selectedLanguageCode, 'ob_forgot_pw_q')),
               ),
             ),
           ] else ...[
@@ -456,7 +473,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 onPressed: () {
                   setState(() => _isForgotPasswordView = false);
                 },
-                child: const Text('Quay lại Đăng nhập'),
+                child: Text(AppTranslations.getText(_selectedLanguageCode, 'ob_back_login')),
               ),
             ),
           ],
@@ -465,7 +482,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             Center(
               child: OutlinedButton(
                 onPressed: () => setState(() => _step = 1),
-                child: const Text('Quay lại'),
+                child: Text(AppTranslations.getText(_selectedLanguageCode, 'ob_back')),
               ),
             ),
           ],
@@ -566,9 +583,18 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
 
   Widget _buildReviewStep() {
     final features = [
-      ('Ghi giao dịch nhanh', 'Thêm thu chi trong vài giây với nút +'),
-      ('Thống kê trực quan', 'Theo dõi xu hướng chi tiêu theo thời gian'),
-      ('Quản lý ví tiền', 'Tổ chức tài khoản và xem tổng số dư'),
+      (
+        AppTranslations.getText(_selectedLanguageCode, 'ob_review_f1_title'),
+        AppTranslations.getText(_selectedLanguageCode, 'ob_review_f1_desc')
+      ),
+      (
+        AppTranslations.getText(_selectedLanguageCode, 'ob_review_f2_title'),
+        AppTranslations.getText(_selectedLanguageCode, 'ob_review_f2_desc')
+      ),
+      (
+        AppTranslations.getText(_selectedLanguageCode, 'ob_review_f3_title'),
+        AppTranslations.getText(_selectedLanguageCode, 'ob_review_f3_desc')
+      ),
     ];
 
     return Padding(
@@ -577,14 +603,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 32),
-          const Text(
-            'Review nhanh tính năng',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          Text(
+            AppTranslations.getText(_selectedLanguageCode, 'ob_review_title'),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Đây là 3 tính năng chính để bắt đầu sử dụng app nhanh hơn.',
-            style: TextStyle(fontSize: 16),
+          Text(
+            AppTranslations.getText(_selectedLanguageCode, 'ob_review_sub'),
+            style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 20),
           Expanded(
@@ -611,7 +637,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: widget.onCompleted,
-              child: const Text('Vào ứng dụng'),
+              child: Text(AppTranslations.getText(_selectedLanguageCode, 'ob_enter_app')),
             ),
           ),
         ],

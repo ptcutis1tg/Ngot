@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/personal_information_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 
@@ -23,7 +24,8 @@ class _SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(title: const Text('Settings'));
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+    return AppBar(title: Text(AppTranslations.getText(languageCode, 'st_title')));
   }
 
   @override
@@ -127,7 +129,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Select language'),
+          title: Text(AppTranslations.getText(appSettings.languageCode, 'st_select_language')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -153,12 +155,23 @@ class _SettingsBodyState extends State<_SettingsBody> {
                   Navigator.of(dialogContext).pop();
                 },
               ),
+              RadioListTile<String>(
+                value: 'ko',
+                groupValue: appSettings.languageCode,
+                title: const Text('한국어'),
+                onChanged: (value) async {
+                  if (value == null) return;
+                  await appSettings.setLanguageCode(value);
+                  if (!dialogContext.mounted) return;
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Close'),
+              child: Text(AppTranslations.getText(appSettings.languageCode, 'st_close')),
             ),
           ],
         );
