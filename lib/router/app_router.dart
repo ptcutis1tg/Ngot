@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../firstscreen/onboarding_flow.dart';
 import '../firstscreen/update_password_screen.dart';
+import '../firstscreen/pin_settings_screen.dart';
 import '../main.dart';
 
 class AppRouter {
@@ -17,6 +18,17 @@ class AppRouter {
         path: '/update-password',
         builder: (context, state) => const UpdatePasswordScreen(),
       ),
+      GoRoute(
+        path: '/reset-pin',
+        builder: (context, state) => const PinSettingsScreen(isRecovery: true),
+        redirect: (context, state) {
+          final session = Supabase.instance.client.auth.currentSession;
+          if (session == null) {
+            return '/';
+          }
+          return null;
+        },
+      ),
     ],
   );
 
@@ -26,7 +38,7 @@ class AppRouter {
     _authSubscription?.cancel();
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.passwordRecovery) {
-        router.go('/update-password');
+        router.go('/reset-pin');
       }
     });
   }

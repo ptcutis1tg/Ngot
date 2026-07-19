@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/pin_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -167,6 +168,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Future<void> _handlePostAuth() async {
+    try {
+      await context.read<PinProvider>().refresh();
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('authMode', 'login');
     if (!mounted) return;

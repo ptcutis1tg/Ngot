@@ -14,6 +14,7 @@ import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:flutter_application_1/providers/pin_provider.dart';
+import 'package:flutter_application_1/firstscreen/pin_setup_prompt.dart';
 import 'package:flutter_application_1/reset.dart';
 import 'package:flutter_application_1/supabase_config.dart';
 import 'package:flutter_application_1/router/app_router.dart';
@@ -235,6 +236,7 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
       context.read<TransactionProvider>().loadTransactions();
       context.read<BackupProvider>().loadConfig();
       context.read<CurrencyProvider>().loadCurrency();
+      showPinSetupPrompt(context);
     });
   }
 

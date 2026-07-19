@@ -201,7 +201,44 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () async {
+                        final error = await pinProvider.sendRecoveryEmail();
+                        if (!mounted) return;
+                        if (error != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(error), backgroundColor: Colors.red),
+                          );
+                        } else {
+                          showDialog<void>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(isVietnamese ? 'Khôi phục PIN' : 'PIN Recovery'),
+                              content: Text(
+                                isVietnamese
+                                    ? 'Đã gửi email khôi phục. Vui lòng kiểm tra hộp thư của bạn và nhấn vào liên kết để đặt PIN mới.'
+                                    : 'Recovery email sent. Please check your inbox and click the link to set a new PIN.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(
+                        isVietnamese ? 'Quên PIN?' : 'Forgot PIN?',
+                        style: const TextStyle(color: Color(0xFF2ECC71), fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                 ],
 
                 // New PIN
