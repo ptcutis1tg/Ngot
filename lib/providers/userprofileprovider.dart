@@ -8,6 +8,7 @@ class UserProfileProvider extends ChangeNotifier {
   static const String _userFullNameKey = 'userFullName';
   static const String _userBioKey = 'userBio';
   static const String _defaultAvatar = 'assets/user/anonymous.jpg';
+  static const String _profileUpdatedAtKey = 'profile_updated_at';
 
   final Future<SharedPreferences> _prefsFuture =
       SharedPreferences.getInstance();
@@ -17,12 +18,19 @@ class UserProfileProvider extends ChangeNotifier {
   String _userAvatar = _defaultAvatar;
   String _userFullName = '';
   String _userBio = '';
+  DateTime _profileUpdatedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   String get userName => _userName;
   String get userEmail => _userEmail;
   String get userAvatar => _userAvatar;
   String get userFullName => _userFullName;
   String get userBio => _userBio;
+  DateTime get profileUpdatedAt => _profileUpdatedAt;
+
+  Future<void> _markUpdated(SharedPreferences prefs) async {
+    _profileUpdatedAt = DateTime.now();
+    await prefs.setString(_profileUpdatedAtKey, _profileUpdatedAt.toIso8601String());
+  }
 
   Future<void> loadProfile() async {
     final prefs = await _prefsFuture;
@@ -48,6 +56,11 @@ class UserProfileProvider extends ChangeNotifier {
     _userAvatar = nextAvatar;
     _userFullName = nextFullName;
     _userBio = nextBio;
+
+    final updatedAtStr = prefs.getString(_profileUpdatedAtKey);
+    if (updatedAtStr != null) {
+      _profileUpdatedAt = DateTime.tryParse(updatedAtStr) ?? DateTime.fromMillisecondsSinceEpoch(0);
+    }
     notifyListeners();
   }
 
@@ -58,6 +71,7 @@ class UserProfileProvider extends ChangeNotifier {
     _userName = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_userNameKey, next);
+    await _markUpdated(prefs);
     notifyListeners();
   }
 
@@ -68,6 +82,7 @@ class UserProfileProvider extends ChangeNotifier {
     _userEmail = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_userEmailKey, next);
+    await _markUpdated(prefs);
     notifyListeners();
   }
 
@@ -78,6 +93,7 @@ class UserProfileProvider extends ChangeNotifier {
     _userAvatar = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_userAvatarKey, next);
+    await _markUpdated(prefs);
     notifyListeners();
   }
 
@@ -88,6 +104,7 @@ class UserProfileProvider extends ChangeNotifier {
     _userFullName = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_userFullNameKey, next);
+    await _markUpdated(prefs);
     notifyListeners();
   }
 
@@ -98,6 +115,30 @@ class UserProfileProvider extends ChangeNotifier {
     _userBio = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_userBioKey, next);
+    await _markUpdated(prefs);
+    notifyListeners();
+  }
+
+  Future<void> updateProfileFromSync({
+    required String userName,
+    required String userFullName,
+    required String userBio,
+    required String userAvatar,
+    required DateTime updatedAt,
+  }) async {
+    _userName = userName;
+    _userFullName = userFullName;
+    _userBio = userBio;
+    _userAvatar = userAvatar;
+    _profileUpdatedAt = updatedAt;
+
+    final prefs = await _prefsFuture;
+    await prefs.setString(_userNameKey, userName);
+    await prefs.setString(_userFullNameKey, userFullName);
+    await prefs.setString(_userBioKey, userBio);
+    await prefs.setString(_userAvatarKey, userAvatar);
+    await prefs.setString(_profileUpdatedAtKey, updatedAt.toIso8601String());
+    
     notifyListeners();
   }
 }

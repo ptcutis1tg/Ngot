@@ -13,6 +13,7 @@ class AppSettingsProvider extends ChangeNotifier {
   static const String _legacyPasswordKey = 'settings_app_password';
   static const String _passwordHashKey = 'settings_app_password_hash';
   static const String _languageCodeKey = 'settings_language_code';
+  static const String _settingsUpdatedAtKey = 'settings_updated_at';
 
   final Future<SharedPreferences> _prefsFuture =
       SharedPreferences.getInstance();
@@ -23,6 +24,7 @@ class AppSettingsProvider extends ChangeNotifier {
   bool _biometricEnabled = false;
   String _passwordHash = '';
   String _languageCode = 'vi';
+  DateTime _settingsUpdatedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   bool get darkMode => _darkMode;
   bool get notificationsEnabled => _notificationsEnabled;
@@ -30,6 +32,12 @@ class AppSettingsProvider extends ChangeNotifier {
   String get languageCode => _languageCode;
   Locale get locale => Locale(_languageCode);
   bool get hasPassword => _passwordHash.isNotEmpty;
+  DateTime get settingsUpdatedAt => _settingsUpdatedAt;
+
+  Future<void> _markUpdated(SharedPreferences prefs) async {
+    _settingsUpdatedAt = DateTime.now();
+    await prefs.setString(_settingsUpdatedAtKey, _settingsUpdatedAt.toIso8601String());
+  }
 
   Future<void> loadSettings() async {
     if (_loaded) return;
@@ -46,6 +54,10 @@ class AppSettingsProvider extends ChangeNotifier {
       await prefs.remove(_legacyPasswordKey);
     }
     _languageCode = prefs.getString(_languageCodeKey) ?? 'vi';
+    final updatedAtStr = prefs.getString(_settingsUpdatedAtKey);
+    if (updatedAtStr != null) {
+      _settingsUpdatedAt = DateTime.tryParse(updatedAtStr) ?? DateTime.fromMillisecondsSinceEpoch(0);
+    }
     _loaded = true;
     notifyListeners();
   }
@@ -56,6 +68,7 @@ class AppSettingsProvider extends ChangeNotifier {
     _darkMode = value;
     final prefs = await _prefsFuture;
     await prefs.setBool(_darkModeKey, value);
+    await _markUpdated(prefs);
     notifyListeners();
   }
 
@@ -65,6 +78,7 @@ class AppSettingsProvider extends ChangeNotifier {
     _notificationsEnabled = value;
     final prefs = await _prefsFuture;
     await prefs.setBool(_notificationsKey, value);
+    await _markUpdated(prefs);
     notifyListeners();
   }
 
@@ -85,6 +99,27 @@ class AppSettingsProvider extends ChangeNotifier {
     _languageCode = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_languageCodeKey, _languageCode);
+    await _markUpdated(prefs);
+    notifyListeners();
+  }
+
+  Future<void> updateSettingsFromSync({
+    required bool darkMode,
+    required bool notificationsEnabled,
+    required String languageCode,
+    required DateTime updatedAt,
+  }) async {
+    _darkMode = darkMode;
+    _notificationsEnabled = notificationsEnabled;
+    _languageCode = languageCode;
+    _settingsUpdatedAt = updatedAt;
+
+    final prefs = await _prefsFuture;
+    await prefs.setBool(_darkModeKey, darkMode);
+    await prefs.setBool(_notificationsKey, notificationsEnabled);
+    await prefs.setString(_languageCodeKey, languageCode);
+    await prefs.setString(_settingsUpdatedAtKey, updatedAt.toIso8601String());
+    
     notifyListeners();
   }
 
