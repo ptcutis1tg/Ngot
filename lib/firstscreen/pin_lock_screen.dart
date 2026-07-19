@@ -115,6 +115,44 @@ class _PinLockScreenState extends State<PinLockScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color:
+                      isDark ? const Color(0xFF0C3827) : Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF2ECC71)
+                        : Colors.green.shade200,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: isDark
+                          ? const Color(0xFF2ECC71)
+                          : Colors.green.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        isVietnamese
+                            ? 'Gợi ý: Bạn có thể tắt/bật khóa PIN trong Cài đặt nếu thấy bất tiện'
+                            : 'Tip: You can enable/disable PIN lock in Settings if inconvenient',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color:
+                              isDark ? Colors.white70 : Colors.green.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               TextField(
                 controller: _pinController,
                 keyboardType: TextInputType.number,

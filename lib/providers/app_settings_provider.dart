@@ -13,6 +13,7 @@ class AppSettingsProvider extends ChangeNotifier {
   static const String _legacyPasswordKey = 'settings_app_password';
   static const String _passwordHashKey = 'settings_app_password_hash';
   static const String _languageCodeKey = 'settings_language_code';
+  static const String _pinLockEnabledKey = 'settings_pin_lock_enabled';
 
   final Future<SharedPreferences> _prefsFuture =
       SharedPreferences.getInstance();
@@ -23,6 +24,7 @@ class AppSettingsProvider extends ChangeNotifier {
   bool _biometricEnabled = false;
   String _passwordHash = '';
   String _languageCode = 'vi';
+  bool _pinLockEnabled = true;
 
   bool get darkMode => _darkMode;
   bool get notificationsEnabled => _notificationsEnabled;
@@ -30,6 +32,7 @@ class AppSettingsProvider extends ChangeNotifier {
   String get languageCode => _languageCode;
   Locale get locale => Locale(_languageCode);
   bool get hasPassword => _passwordHash.isNotEmpty;
+  bool get pinLockEnabled => _pinLockEnabled;
 
   Future<void> loadSettings() async {
     if (_loaded) return;
@@ -46,6 +49,7 @@ class AppSettingsProvider extends ChangeNotifier {
       await prefs.remove(_legacyPasswordKey);
     }
     _languageCode = prefs.getString(_languageCodeKey) ?? 'vi';
+    _pinLockEnabled = prefs.getBool(_pinLockEnabledKey) ?? true;
     _loaded = true;
     notifyListeners();
   }
@@ -85,6 +89,15 @@ class AppSettingsProvider extends ChangeNotifier {
     _languageCode = next;
     final prefs = await _prefsFuture;
     await prefs.setString(_languageCodeKey, _languageCode);
+    notifyListeners();
+  }
+
+  Future<void> setPinLockEnabled(bool value) async {
+    if (_pinLockEnabled == value) return;
+
+    _pinLockEnabled = value;
+    final prefs = await _prefsFuture;
+    await prefs.setBool(_pinLockEnabledKey, value);
     notifyListeners();
   }
 

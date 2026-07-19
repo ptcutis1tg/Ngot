@@ -78,8 +78,12 @@ class _AppLaunchGateState extends State<AppLaunchGate>
         final isLoggedIn = session != null;
 
         if (isLoggedIn && _completedOnboarding) {
+          final appSettings = context.watch<AppSettingsProvider>();
           final pinProvider = context.watch<PinProvider>();
-          if (pinProvider.hasPin && !_isUnlocked) {
+          // Only show lock screen if PIN lock is enabled and user has a PIN
+          if (appSettings.pinLockEnabled &&
+              pinProvider.hasPin &&
+              !_isUnlocked) {
             return PinLockScreen(onUnlocked: _onPinUnlocked);
           }
           return widget.child;
