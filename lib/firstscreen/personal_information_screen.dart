@@ -204,6 +204,7 @@ class _PersonalInformationScreenBodyState
   @override
   Widget build(BuildContext context) {
     final appSettings = context.watch<AppSettingsProvider>();
+    final userProfile = context.watch<UserProfileProvider>();
     final isVietnamese = appSettings.languageCode == 'vi';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
@@ -405,8 +406,8 @@ class _PersonalInformationScreenBodyState
                       // Email
                       _buildReadOnlyField(
                         label: isVietnamese ? 'Địa chỉ Email' : 'Email Address',
-                        value: context.read<UserProfileProvider>().userEmail.isNotEmpty
-                            ? context.read<UserProfileProvider>().userEmail
+                        value: userProfile.userEmail.isNotEmpty
+                            ? userProfile.userEmail
                             : (supabaseUser?.email ?? 'N/A'),
                         icon: Icons.email_outlined,
                         bgColor: readOnlyBgColor,
