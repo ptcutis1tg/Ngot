@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,11 +18,31 @@ class AppLaunchGate extends StatefulWidget {
 class _AppLaunchGateState extends State<AppLaunchGate> {
   bool _isLoading = true;
   bool _completedOnboarding = false;
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadOnboardingStatus();
+    
+    // Listen to Supabase auth state changes and sync with UserProfileProvider
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final session = data.session;
+      final user = session?.user;
+      if (user != null && mounted) {
+        final provider = context.read<UserProfileProvider>();
+        provider.setUserEmail(user.email ?? '');
+        if (provider.userName.isEmpty) {
+          provider.setUserName(user.email?.split('@').first ?? 'User');
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadOnboardingStatus() async {
@@ -164,6 +186,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           email: email,
           password: password,
         );
+        if (mounted) {
+          await context.read<UserProfileProvider>().setUserEmail(email);
+        }
         _showMessage('Đăng ký thành công! Vui lòng đăng nhập.');
         await _handlePostAuth();
       }
