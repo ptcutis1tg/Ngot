@@ -12,6 +12,7 @@ class TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeCode = Localizations.localeOf(context).languageCode;
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
         final email = userProfile.userEmail.isNotEmpty ? userProfile.userEmail : 'Guest';
@@ -30,9 +31,9 @@ class TopBar extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  'Real-time Ledger',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.getText(localeCode, 'db_real_time_ledger'),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFE5F4EB),
