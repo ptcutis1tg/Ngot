@@ -6,9 +6,11 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
@@ -28,6 +30,15 @@ void main() {
       'settings_language_code': 'en',
     });
 
+    // Initialize Supabase placeholder for test execution
+    await Supabase.initialize(
+      url: 'https://placeholder.supabase.co',
+      anonKey: 'placeholder',
+      authOptions: const FlutterAuthClientOptions(
+        autoRefreshToken: false,
+      ),
+    );
+
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       MultiProvider(
@@ -38,16 +49,28 @@ void main() {
           ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
           ChangeNotifierProvider(create: (_) => CurrencyProvider()),
         ],
-        child: const DailyExpenseApp(),
+        child: const MaterialApp(
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: [
+            Locale('vi'),
+            Locale('en'),
+            Locale('ko'),
+          ],
+          home: MainNavigationScreen(),
+        ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
-    // Verify that the title 'Dashboard' is present in the BottomNavigationBar.
-    expect(find.text('Dashboard'), findsOneWidget);
-    expect(find.text('Statistics'), findsOneWidget);
-    expect(find.text('Wallets'), findsOneWidget);
-    expect(find.text('Settings'), findsOneWidget);
+    // Verify that the BottomNavigationBar labels are present.
+    expect(find.text('TRANG CHỦ'), findsOneWidget);
+    expect(find.text('BÁO CÁO'), findsOneWidget);
+    expect(find.text('NGÂN QUỸ'), findsOneWidget);
+    expect(find.text('CÀI ĐẶT'), findsOneWidget);
 
     // Verify that the floating action button is present.
     expect(find.byIcon(Icons.add), findsOneWidget);

@@ -4,6 +4,7 @@ import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
+import 'package:provider/provider.dart';
 
 import 'settings_components/settings_sections.dart';
 

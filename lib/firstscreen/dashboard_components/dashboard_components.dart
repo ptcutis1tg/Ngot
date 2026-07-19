@@ -14,7 +14,7 @@ class TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
-        final email = Supabase.instance.client.auth.currentUser?.email ?? 'Guest';
+        final email = userProfile.userEmail.isNotEmpty ? userProfile.userEmail : 'Guest';
         return Row(
           children: [
             Container(

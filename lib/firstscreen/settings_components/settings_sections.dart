@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/app_lock_settings_screen.dart';
-import 'package:flutter_application_1/firstscreen/personal_information_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
