@@ -129,7 +129,7 @@ class DailyExpenseApp extends StatelessWidget {
           secondary: const Color(0xFF27AE60),
           surface: Colors.white,
         ),
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+        textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -183,12 +183,7 @@ class DailyExpenseApp extends StatelessWidget {
           titleTextStyle: TextStyle(color: Colors.white),
           contentTextStyle: TextStyle(color: Colors.white70),
         ),
-        textTheme: GoogleFonts.interTextTheme(
-          ThemeData(brightness: Brightness.dark).textTheme,
-        ).apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
       ),
       routerConfig: AppRouter.router,
     );
