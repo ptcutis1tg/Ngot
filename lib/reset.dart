@@ -1,9 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppInitializer {
-  // Flag để kiểm tra có reset hay không
-  static const String _resetFlagKey = 'app_reset_on_launch';
-
   // Initialize app với option reset
   static Future<void> initialize({bool resetData = false}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -11,7 +9,7 @@ class AppInitializer {
     if (resetData) {
       // Xóa tất cả dữ liệu
       await prefs.clear();
-      print('🔄 App data reset successfully!');
+      debugPrint('🔄 App data reset successfully!');
     }
 
     // Khởi tạo dữ liệu mặc định
@@ -22,7 +20,7 @@ class AppInitializer {
       await prefs.setString('userName', '');
       await prefs.setString('userEmail', '');
       await prefs.setString('userAvatar', 'assets/user/anonymous.jpg');
-      print('✅ User profile initialized');
+      debugPrint('✅ User profile initialized');
     }
   }
 }

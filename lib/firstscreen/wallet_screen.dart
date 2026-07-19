@@ -188,7 +188,7 @@ class _WalletCard extends StatelessWidget {
       margin: const EdgeInsets.only(right: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF232323) : color,
+        color: isDark ? Theme.of(context).cardColor : color,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -253,7 +253,7 @@ class _AccountItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1B1B1B) : Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

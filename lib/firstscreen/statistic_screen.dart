@@ -225,7 +225,7 @@ class _FilterChipState extends State<_FilterChip> {
         decoration: BoxDecoration(
           color: widget.selected
               ? const Color(0xFF2ECC71)
-              : (isDark ? const Color(0xFF1B1B1B) : Colors.white),
+              : (isDark ? Theme.of(context).cardColor : Colors.white),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -372,7 +372,7 @@ class _TopSpendingSectionState extends State<_TopSpendingSection> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1B1B1B) : Colors.white,
+              color: isDark ? Theme.of(context).cardColor : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Text('No spending in selected range'),
@@ -430,7 +430,7 @@ class _CategoryTileState extends State<_CategoryTile> {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF232323) : Colors.white,
+        color: isDark ? Theme.of(context).cardColor : Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
