@@ -6,21 +6,21 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF052E1F),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF052E1F) : const Color(0xFFF6FBF8),
       body: SizedBox.expand(
         child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF031F16),
-                Color(0xFF052E1F),
-              ],
+              colors: isDark 
+                ? [const Color(0xFF031F16), const Color(0xFF052E1F)]
+                : [const Color(0xFFE8F7EE), const Color(0xFFF6FBF8)],
             ),
           ),
-          child: SafeArea(child: _DashboardBody()),
+          child: const SafeArea(child: _DashboardBody()),
         ),
       ),
     );

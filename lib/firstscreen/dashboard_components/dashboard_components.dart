@@ -13,6 +13,7 @@ class TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = Localizations.localeOf(context).languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
         final email = userProfile.userEmail.isNotEmpty ? userProfile.userEmail : 'Guest';
@@ -22,10 +23,10 @@ class TopBar extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFF0C3A29),
+                color: isDark ? const Color(0xFF0C3A29) : const Color(0xFFE6F7ED),
                 borderRadius: BorderRadius.circular(25),
               ),
-              child: const Icon(Icons.menu, color: Color(0xFF1CF07B), size: 26),
+              child: Icon(Icons.menu, color: const Color(0xFF1CF07B), size: 26),
             ),
             const Spacer(),
             Column(
@@ -33,10 +34,10 @@ class TopBar extends StatelessWidget {
               children: [
                 Text(
                   AppTranslations.getText(localeCode, 'db_real_time_ledger'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFFE5F4EB),
+                    color: isDark ? const Color(0xFFE5F4EB) : const Color(0xFF0A3825),
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -52,11 +53,11 @@ class TopBar extends StatelessWidget {
             const Spacer(),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF4A1515),
+                color: isDark ? const Color(0xFF4A1515) : const Color(0xFFFFEAEA),
                 borderRadius: BorderRadius.circular(25),
               ),
               child: IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white70),
+                icon: Icon(Icons.logout, color: isDark ? Colors.white70 : const Color(0xFFFF4A73)),
                 onPressed: () {
                   Supabase.instance.client.auth.signOut();
                 },
@@ -75,6 +76,7 @@ class ProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = Localizations.localeOf(context).languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer<UserProfileProvider>(
       builder: (context, profile, child) {
@@ -96,10 +98,10 @@ class ProfileSection extends StatelessWidget {
                   return Text(
                     currencyProvider.numberFormat
                         .format(txProvider.totalBalance),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 62,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFFF2FFF8),
+                      color: isDark ? const Color(0xFFF2FFF8) : const Color(0xFF0A3825),
                       height: 1,
                       letterSpacing: -1.3,
                     ),
@@ -181,12 +183,13 @@ class IncomeExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0C3827),
+        color: isDark ? const Color(0xFF0C3827) : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFF10633E), width: 1),
+        border: Border.all(color: isDark ? const Color(0xFF10633E) : const Color(0xFFE2F3E9), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,22 +200,22 @@ class IncomeExpenseTile extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Color(0xFF95AFA1),
+                style: TextStyle(
+                  color: isDark ? const Color(0xFF95AFA1) : const Color(0xFF5E856F),
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  letterSpacing: 0.3,
+                  fontSize: 14,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
             amount,
             style: TextStyle(
-              color: valueColor,
-              fontWeight: FontWeight.w700,
-              fontSize: 20,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: isDark ? valueColor : const Color(0xFF0A3825),
+              letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 8),
@@ -311,14 +314,14 @@ String formatGroupHeading(DateTime day, DateTime now, String languageCode) {
   }
 }
 
-TxVisualMeta getTxMeta(String title, bool isIncome, String languageCode) {
+TxVisualMeta getTxMeta(String title, bool isIncome, String languageCode, bool isDark) {
   final lower = title.toLowerCase();
   if (lower.contains('ăn') ||
       lower.contains('trưa') ||
       lower.contains('food')) {
     return TxVisualMeta(
       icon: Icons.restaurant,
-      iconBg: const Color(0xFF4F3A11),
+      iconBg: isDark ? const Color(0xFF4F3A11) : const Color(0xFFFFF3E0),
       iconColor: const Color(0xFFFF9B29),
       subtitle: AppTranslations.getText(languageCode, 'cat_food'),
     );
@@ -326,7 +329,7 @@ TxVisualMeta getTxMeta(String title, bool isIncome, String languageCode) {
   if (lower.contains('xăng') || lower.contains('xe') || lower.contains('gas')) {
     return TxVisualMeta(
       icon: Icons.directions_car,
-      iconBg: const Color(0xFF1A3850),
+      iconBg: isDark ? const Color(0xFF1A3850) : const Color(0xFFE3F2FD),
       iconColor: const Color(0xFF4AA3FF),
       subtitle: AppTranslations.getText(languageCode, 'cat_transport'),
     );
@@ -334,14 +337,14 @@ TxVisualMeta getTxMeta(String title, bool isIncome, String languageCode) {
   if (lower.contains('lương') || lower.contains('salary') || isIncome) {
     return TxVisualMeta(
       icon: Icons.payments,
-      iconBg: const Color(0xFF0B5A30),
+      iconBg: isDark ? const Color(0xFF0B5A30) : const Color(0xFFE8F5E9),
       iconColor: const Color(0xFF2CFF7D),
       subtitle: AppTranslations.getText(languageCode, 'cat_income'),
     );
   }
   return TxVisualMeta(
     icon: isIncome ? Icons.south_west : Icons.north_east,
-    iconBg: const Color(0xFF343651),
+    iconBg: isDark ? const Color(0xFF343651) : const Color(0xFFE8EAF6),
     iconColor: const Color(0xFFA7B2FF),
     subtitle: AppTranslations.getText(languageCode, 'cat_other'),
   );
@@ -353,6 +356,7 @@ class RecentHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = Localizations.localeOf(context).languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -361,9 +365,9 @@ class RecentHeader extends StatelessWidget {
             AppTranslations.getText(localeCode, 'db_history'),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 38,
-              color: Color(0xFFE9F5EE),
+              color: isDark ? const Color(0xFFE9F5EE) : const Color(0xFF0A3825),
               fontWeight: FontWeight.w700,
               letterSpacing: -0.8,
             ),
@@ -393,42 +397,37 @@ class RecentList extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = context.watch<CurrencyProvider>().numberFormat;
     final localeCode = Localizations.localeOf(context).languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer<TransactionProvider>(
       builder: (context, txProvider, _) {
-        if (!txProvider.isLoaded) {
-          return const Padding(
-            padding: EdgeInsets.only(top: 24),
-            child: Center(
-              child: CircularProgressIndicator(color: Color(0xFF20F27F)),
-            ),
-          );
-        }
         if (txProvider.transactions.isEmpty) {
           return Container(
-            margin: const EdgeInsets.only(top: 12),
-            padding: const EdgeInsets.all(18),
+            margin: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.symmetric(vertical: 40),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A3825),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF11653F), width: 1),
+              color: isDark ? const Color(0xFF0A3825) : const Color(0xFFFFFFFF),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: isDark ? const Color(0xFF11653F) : const Color(0xFFE2F3E9), width: 1),
             ),
-            child: Text(
-              AppTranslations.getText(localeCode, 'db_empty'),
-              style: const TextStyle(
-                color: Color(0xFFC7D9D0),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+            child: Center(
+              child: Text(
+                AppTranslations.getText(localeCode, 'db_no_transactions'),
+                style: TextStyle(
+                  color: isDark ? const Color(0xFFC7D9D0) : const Color(0xFF5E856F),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           );
         }
 
-        final groups = groupByDay(context, txProvider.transactions.take(8).toList());
+        final grouped = groupByDay(context, txProvider.transactions);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: groups.map((group) {
+          children: grouped.map((group) {
             return TransactionGroupSection(
               heading: group.heading,
               entries: group.items,
@@ -458,6 +457,7 @@ class TransactionGroupSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -465,8 +465,8 @@ class TransactionGroupSection extends StatelessWidget {
         children: [
           Text(
             heading,
-            style: const TextStyle(
-              color: Color(0xFF8FA39B),
+            style: TextStyle(
+              color: isDark ? const Color(0xFF8FA39B) : const Color(0xFF5E856F),
               fontSize: 14,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.2,
@@ -478,7 +478,7 @@ class TransactionGroupSection extends StatelessWidget {
               final isIncome = tx.amount >= 0;
               final amountText =
                   '${isIncome ? '+' : '-'}${currencyFormat.format(tx.amount.abs())}';
-              final meta = getTxMeta(tx.title, isIncome, languageCode);
+              final meta = getTxMeta(tx.title, isIncome, languageCode, isDark);
 
               return TransactionRow(
                 icon: meta.icon,
@@ -521,13 +521,14 @@ class TransactionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A3825),
+        color: isDark ? const Color(0xFF0A3825) : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF11653F), width: 1),
+        border: Border.all(color: isDark ? const Color(0xFF11653F) : const Color(0xFFE2F3E9), width: 1),
       ),
       child: Row(
         children: [
@@ -547,8 +548,8 @@ class TransactionRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFFEBF9F0),
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFFEBF9F0) : const Color(0xFF0A3825),
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
@@ -556,8 +557,8 @@ class TransactionRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFF90AE9F),
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFF90AE9F) : const Color(0xFF5E856F),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
