@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/debug.dart';
-import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
-import 'package:flutter_application_1/firstscreen/settings_screen.dart';
-import 'package:flutter_application_1/firstscreen/statistic_screen.dart';
-import 'package:flutter_application_1/firstscreen/wallet_screen.dart';
+import 'package:flutter_application_1/firstscreen/dashboard_screen.dart' deferred as dashboard;
+import 'package:flutter_application_1/firstscreen/settings_screen.dart' deferred as settings;
+import 'package:flutter_application_1/firstscreen/statistic_screen.dart' deferred as statistic;
+import 'package:flutter_application_1/firstscreen/wallet_screen.dart' deferred as wallet;
 import 'package:flutter_application_1/firstscreen/widget/addtransaction.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
@@ -28,6 +28,9 @@ const bool resetOnboardingFlowOnly = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  PaintingBinding.instance.imageCache.maximumSize = 20;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 20 << 20;
 
   try {
     await dotenv.load(fileName: ".env");
@@ -210,12 +213,52 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
   int _selectedIndex = 0;
   late final PageController _pageController;
 
-  static const List<Widget> _pages = [
-    DashboardScreen(),
-    StatisticsScreen(),
-    WalletScreen(),
-    SettingsScreen(),
-  ];
+  Widget _buildDeferred(int index) {
+    switch (index) {
+      case 0:
+        return FutureBuilder(
+          future: dashboard.loadLibrary(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return dashboard.DashboardScreen();
+            }
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF2ECC71)));
+          },
+        );
+      case 1:
+        return FutureBuilder(
+          future: statistic.loadLibrary(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return statistic.StatisticsScreen();
+            }
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF2ECC71)));
+          },
+        );
+      case 2:
+        return FutureBuilder(
+          future: wallet.loadLibrary(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return wallet.WalletScreen();
+            }
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF2ECC71)));
+          },
+        );
+      case 3:
+        return FutureBuilder(
+          future: settings.loadLibrary(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return settings.SettingsScreen();
+            }
+            return const Center(child: CircularProgressIndicator(color: Color(0xFF2ECC71)));
+          },
+        );
+      default:
+        return const SizedBox();
+    }
+  }
 
   @override
   void initState() {
@@ -260,7 +303,12 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
             setState(() => _selectedIndex = index);
           }
         },
-        children: _pages,
+        children: [
+          _buildDeferred(0),
+          _buildDeferred(1),
+          _buildDeferred(2),
+          _buildDeferred(3),
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
