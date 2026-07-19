@@ -85,7 +85,7 @@ class OnboardingFlow extends StatefulWidget {
 class _OnboardingFlowState extends State<OnboardingFlow> {
   late int _step;
   String _selectedLanguageCode = 'vi';
-  
+
   // Auth states
   bool _isLoginView = true;
   bool _isForgotPasswordView = false;
@@ -339,7 +339,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2),
                     )
                   : Text(_isForgotPasswordView
                       ? 'Gửi Email'
@@ -424,7 +425,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 return Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF2ECC71).withValues(alpha: 0.12),
+                      backgroundColor:
+                          const Color(0xFF2ECC71).withValues(alpha: 0.12),
                       child: Text('${index + 1}'),
                     ),
                     title: Text(feature.$1),

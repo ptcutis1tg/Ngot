@@ -69,7 +69,9 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
           content: Text(
             widget.isRecovery
                 ? 'Đã đặt lại PIN thành công'
-                : (provider.hasPin ? 'Đã đổi PIN thành công' : 'Đã thiết lập PIN thành công'),
+                : (provider.hasPin
+                    ? 'Đã đổi PIN thành công'
+                    : 'Đã thiết lập PIN thành công'),
           ),
           backgroundColor: const Color(0xFF2ECC71),
         ),
@@ -120,7 +122,8 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final labelColor = isDarkMode ? Colors.white70 : Colors.black54;
-    final textStyle = TextStyle(color: isDarkMode ? Colors.white : Colors.black);
+    final textStyle =
+        TextStyle(color: isDarkMode ? Colors.white : Colors.black);
 
     final showCurrentPin = pinProvider.hasPin && !widget.isRecovery;
 
@@ -147,7 +150,8 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                     isVietnamese
                         ? 'Bạn đang trong chế độ đặt lại PIN qua email khôi phục.'
                         : 'You are resetting your PIN via recovery email.',
-                    style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        color: Colors.amber, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
@@ -156,9 +160,10 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      border:
+                          Border.all(color: Colors.red.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       _errorMessage!,
@@ -173,7 +178,10 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                 if (showCurrentPin) ...[
                   Text(
                     isVietnamese ? 'Mã PIN hiện tại' : 'Current PIN',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: labelColor),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: labelColor),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -187,16 +195,23 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                       FilteringTextInputFormatter.digitsOnly,
                     ],
                     decoration: InputDecoration(
-                      hintText: isVietnamese ? 'Nhập 6 số PIN hiện tại' : 'Enter 6-digit current PIN',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                      hintText: isVietnamese
+                          ? 'Nhập 6 số PIN hiện tại'
+                          : 'Enter 6-digit current PIN',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16)),
                       counterText: '',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return isVietnamese ? 'Vui lòng nhập PIN hiện tại' : 'Please enter current PIN';
+                        return isVietnamese
+                            ? 'Vui lòng nhập PIN hiện tại'
+                            : 'Please enter current PIN';
                       }
                       if (value.length != 6) {
-                        return isVietnamese ? 'PIN phải gồm 6 chữ số' : 'PIN must be 6 digits';
+                        return isVietnamese
+                            ? 'PIN phải gồm 6 chữ số'
+                            : 'PIN must be 6 digits';
                       }
                       return null;
                     },
@@ -206,17 +221,22 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () async {
+                        final buildContext = context;
                         final error = await pinProvider.sendRecoveryEmail();
-                        if (!mounted) return;
+                        if (!buildContext.mounted) return;
                         if (error != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(error), backgroundColor: Colors.red),
+                          ScaffoldMessenger.of(buildContext).showSnackBar(
+                            SnackBar(
+                                content: Text(error),
+                                backgroundColor: Colors.red),
                           );
                         } else {
                           showDialog<void>(
-                            context: context,
+                            context: buildContext,
                             builder: (context) => AlertDialog(
-                              title: Text(isVietnamese ? 'Khôi phục PIN' : 'PIN Recovery'),
+                              title: Text(isVietnamese
+                                  ? 'Khôi phục PIN'
+                                  : 'PIN Recovery'),
                               content: Text(
                                 isVietnamese
                                     ? 'Đã gửi email khôi phục. Vui lòng kiểm tra hộp thư của bạn và nhấn vào liên kết để đặt PIN mới.'
@@ -234,7 +254,9 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                       },
                       child: Text(
                         isVietnamese ? 'Quên PIN?' : 'Forgot PIN?',
-                        style: const TextStyle(color: Color(0xFF2ECC71), fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Color(0xFF2ECC71),
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -248,7 +270,10 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                       : (pinProvider.hasPin
                           ? (isVietnamese ? 'Mã PIN mới' : 'New PIN')
                           : (isVietnamese ? 'Nhập mã PIN' : 'Enter PIN')),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: labelColor),
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: labelColor),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -262,16 +287,23 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                     FilteringTextInputFormatter.digitsOnly,
                   ],
                   decoration: InputDecoration(
-                    hintText: isVietnamese ? 'Nhập 6 số PIN mới' : 'Enter 6-digit PIN',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    hintText: isVietnamese
+                        ? 'Nhập 6 số PIN mới'
+                        : 'Enter 6-digit PIN',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16)),
                     counterText: '',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return isVietnamese ? 'Vui lòng nhập mã PIN' : 'Please enter PIN';
+                      return isVietnamese
+                          ? 'Vui lòng nhập mã PIN'
+                          : 'Please enter PIN';
                     }
                     if (value.length != 6) {
-                      return isVietnamese ? 'PIN phải gồm 6 chữ số' : 'PIN must be 6 digits';
+                      return isVietnamese
+                          ? 'PIN phải gồm 6 chữ số'
+                          : 'PIN must be 6 digits';
                     }
                     return null;
                   },
@@ -281,7 +313,10 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                 // Confirm PIN
                 Text(
                   isVietnamese ? 'Xác nhận mã PIN' : 'Confirm PIN',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: labelColor),
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: labelColor),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -295,16 +330,23 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                     FilteringTextInputFormatter.digitsOnly,
                   ],
                   decoration: InputDecoration(
-                    hintText: isVietnamese ? 'Nhập lại 6 số PIN để xác nhận' : 'Re-enter 6-digit PIN to confirm',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    hintText: isVietnamese
+                        ? 'Nhập lại 6 số PIN để xác nhận'
+                        : 'Re-enter 6-digit PIN to confirm',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16)),
                     counterText: '',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return isVietnamese ? 'Vui lòng xác nhận mã PIN' : 'Please confirm PIN';
+                      return isVietnamese
+                          ? 'Vui lòng xác nhận mã PIN'
+                          : 'Please confirm PIN';
                     }
                     if (value != _newPinController.text) {
-                      return isVietnamese ? 'PIN xác nhận không khớp' : 'PIN confirmation does not match';
+                      return isVietnamese
+                          ? 'PIN xác nhận không khớp'
+                          : 'PIN confirmation does not match';
                     }
                     return null;
                   },
@@ -313,8 +355,11 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
 
                 // Suggested PIN Section
                 Card(
-                  color: isDarkMode ? const Color(0xFF0C3827) : Colors.green.shade50,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  color: isDarkMode
+                      ? const Color(0xFF0C3827)
+                      : Colors.green.shade50,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -330,13 +375,17 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                             const SizedBox(height: 4),
                             Text(
                               pinProvider.suggestedPin,
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 2),
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2),
                             ),
                           ],
                         ),
                         TextButton(
                           key: const Key('use-suggested-pin'),
-                          onPressed: () => _useSuggestedPin(pinProvider.suggestedPin),
+                          onPressed: () =>
+                              _useSuggestedPin(pinProvider.suggestedPin),
                           child: Text(
                             isVietnamese ? 'Dùng PIN gợi ý' : 'Use Suggested',
                             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -351,23 +400,28 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                 // Save Action
                 ElevatedButton(
                   key: const Key('pin-save'),
-                  onPressed: _isSaving || _isRemoving ? null : () => _savePin(pinProvider),
+                  onPressed: _isSaving || _isRemoving
+                      ? null
+                      : () => _savePin(pinProvider),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2ECC71),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                     elevation: 2,
                   ),
                   child: _isSaving
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
                           isVietnamese ? 'Lưu mã PIN' : 'Save PIN',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
 
@@ -376,22 +430,27 @@ class _PinSettingsScreenState extends State<PinSettingsScreen> {
                   const SizedBox(height: 16),
                   OutlinedButton(
                     key: const Key('pin-remove'),
-                    onPressed: _isSaving || _isRemoving ? null : () => _removePin(pinProvider),
+                    onPressed: _isSaving || _isRemoving
+                        ? null
+                        : () => _removePin(pinProvider),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
                     child: _isRemoving
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.red),
                           )
                         : Text(
                             isVietnamese ? 'Xóa mã PIN' : 'Delete PIN',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ],

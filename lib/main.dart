@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/debug.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart';
-import 'package:flutter_application_1/firstscreen/onboarding_flow.dart';
 import 'package:flutter_application_1/firstscreen/settings_screen.dart';
 import 'package:flutter_application_1/firstscreen/statistic_screen.dart';
 import 'package:flutter_application_1/firstscreen/wallet_screen.dart';

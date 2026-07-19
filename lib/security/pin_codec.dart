@@ -23,7 +23,8 @@ class PinCodec {
     if (!isValidPin(pin)) {
       throw ArgumentError('Mã PIN phải gồm đúng 6 chữ số.');
     }
-    final saltBytes = List<int>.generate(_saltLength, (_) => Random.secure().nextInt(256));
+    final saltBytes =
+        List<int>.generate(_saltLength, (_) => Random.secure().nextInt(256));
     final salt = base64UrlEncode(saltBytes);
     final hashBytes = _pbkdf2(
       pin: pin,

@@ -7,22 +7,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 class FakePinAuthClient implements PinAuthClient {
-  FakePinAuthClient({this.metadata = const {}, this.email = 'user@example.com'});
+  FakePinAuthClient(
+      {this.metadata = const {}, this.email = 'user@example.com'});
   Map<String, dynamic> metadata;
+  @override
   String? email;
   Map<String, dynamic>? lastUpdate;
   String? recoveryEmail;
 
-  @override Map<String, dynamic>? get userMetadata => metadata;
-  @override Future<void> updateMetadata(Map<String, dynamic> value) async {
+  @override
+  Map<String, dynamic>? get userMetadata => metadata;
+  @override
+  Future<void> updateMetadata(Map<String, dynamic> value) async {
     lastUpdate = value;
     metadata = value;
   }
-  @override Future<void> sendRecoveryEmail(String value) async => recoveryEmail = value;
+
+  @override
+  Future<void> sendRecoveryEmail(String value) async => recoveryEmail = value;
 }
 
 void main() {
-  testWidgets('requires matching six-digit PIN confirmation before saving', (tester) async {
+  testWidgets('requires matching six-digit PIN confirmation before saving',
+      (tester) async {
     final provider = PinProvider(FakePinAuthClient(), codec: PinCodec());
     await provider.refresh();
     await tester.pumpWidget(MultiProvider(
@@ -51,6 +58,11 @@ void main() {
     ));
     final suggestion = provider.suggestedPin;
     await tester.tap(find.byKey(const Key('use-suggested-pin')));
-    expect(tester.widget<TextFormField>(find.byKey(const Key('pin-input'))).controller!.text, suggestion);
+    expect(
+        tester
+            .widget<TextFormField>(find.byKey(const Key('pin-input')))
+            .controller!
+            .text,
+        suggestion);
   });
 }

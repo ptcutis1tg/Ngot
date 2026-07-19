@@ -71,10 +71,10 @@ class _PersonalInformationScreenBodyState
       await provider.setUserAvatar(_avatarPath.trim());
 
       if (!mounted) return;
-      
+
       final isVietnamese =
           context.read<AppSettingsProvider>().languageCode == 'vi';
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -122,7 +122,7 @@ class _PersonalInformationScreenBodyState
     final persistedAvatar = await _persistFinalAvatarSelection(
       selectedAvatar.trim(),
     );
-    
+
     setState(() {
       _avatarPath = persistedAvatar;
     });
@@ -181,9 +181,8 @@ class _PersonalInformationScreenBodyState
       return value;
     }
 
-    final normalizedPath = value.startsWith('file://')
-        ? Uri.parse(value).toFilePath()
-        : value;
+    final normalizedPath =
+        value.startsWith('file://') ? Uri.parse(value).toFilePath() : value;
     final source = File(normalizedPath);
     if (!source.existsSync()) {
       return _avatarPath;
@@ -208,13 +207,18 @@ class _PersonalInformationScreenBodyState
     final appSettings = context.watch<AppSettingsProvider>();
     final isVietnamese = appSettings.languageCode == 'vi';
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Theme colors matching the premium look of the app
-    final cardBgColor = isDark ? const Color(0xFF0F3124) : const Color(0xFFF0F5F2);
-    final borderColor = isDark ? const Color(0xFF165C40) : const Color(0xFFD0E0D8);
-    final textOnCardColor = isDark ? const Color(0xFFE5F4EB) : const Color(0xFF103A27);
-    final labelColor = isDark ? const Color(0xFF98AF9F) : const Color(0xFF557F67);
-    final readOnlyBgColor = isDark ? const Color(0xFF082218) : const Color(0xFFE5EDE9);
+    final cardBgColor =
+        isDark ? const Color(0xFF0F3124) : const Color(0xFFF0F5F2);
+    final borderColor =
+        isDark ? const Color(0xFF165C40) : const Color(0xFFD0E0D8);
+    final textOnCardColor =
+        isDark ? const Color(0xFFE5F4EB) : const Color(0xFF103A27);
+    final labelColor =
+        isDark ? const Color(0xFF98AF9F) : const Color(0xFF557F67);
+    final readOnlyBgColor =
+        isDark ? const Color(0xFF082218) : const Color(0xFFE5EDE9);
 
     // Get current User Metadata from Supabase
     final supabaseUser = Supabase.instance.client.auth.currentUser;
@@ -224,7 +228,8 @@ class _PersonalInformationScreenBodyState
     if (rawCreatedAt != null) {
       try {
         final parsedDate = DateTime.parse(rawCreatedAt);
-        joinDate = DateFormat(isVietnamese ? 'dd/MM/yyyy' : 'MM/dd/yyyy').format(parsedDate);
+        joinDate = DateFormat(isVietnamese ? 'dd/MM/yyyy' : 'MM/dd/yyyy')
+            .format(parsedDate);
       } catch (_) {
         joinDate = rawCreatedAt;
       }
@@ -234,7 +239,8 @@ class _PersonalInformationScreenBodyState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isVietnamese ? 'Thông tin cá nhân' : 'Personal Information'),
+        title:
+            Text(isVietnamese ? 'Thông tin cá nhân' : 'Personal Information'),
         actions: [
           if (_isSaving)
             const Padding(
@@ -243,7 +249,8 @@ class _PersonalInformationScreenBodyState
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
                 ),
               ),
             )
@@ -272,7 +279,8 @@ class _PersonalInformationScreenBodyState
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFF2ECC71), width: 3),
+                          border: Border.all(
+                              color: const Color(0xFF2ECC71), width: 3),
                         ),
                         child: CircleAvatar(
                           key: ValueKey<String>(_avatarPath),
@@ -308,7 +316,8 @@ class _PersonalInformationScreenBodyState
 
                 // Editable Fields Section
                 Text(
-                  (isVietnamese ? 'THÔNG TIN CÁ NHÂN' : 'PERSONAL INFORMATION').toUpperCase(),
+                  (isVietnamese ? 'THÔNG TIN CÁ NHÂN' : 'PERSONAL INFORMATION')
+                      .toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -317,7 +326,7 @@ class _PersonalInformationScreenBodyState
                   ),
                 ),
                 const SizedBox(height: 10),
-                
+
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -346,14 +355,15 @@ class _PersonalInformationScreenBodyState
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Username (Tên người dùng)
                       TextFormField(
                         controller: _usernameController,
                         style: TextStyle(color: textOnCardColor),
                         decoration: _fieldDecoration(
                           context: context,
-                          labelText: isVietnamese ? 'Tên người dùng' : 'Username',
+                          labelText:
+                              isVietnamese ? 'Tên người dùng' : 'Username',
                           icon: Icons.alternate_email,
                         ),
                         validator: (value) {
@@ -366,7 +376,7 @@ class _PersonalInformationScreenBodyState
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Bio (Mô tả bản thân)
                       TextFormField(
                         controller: _bioController,
@@ -374,7 +384,8 @@ class _PersonalInformationScreenBodyState
                         maxLines: 3,
                         decoration: _fieldDecoration(
                           context: context,
-                          labelText: isVietnamese ? 'Mô tả bản thân' : 'Biography',
+                          labelText:
+                              isVietnamese ? 'Mô tả bản thân' : 'Biography',
                           icon: Icons.description_outlined,
                         ),
                       ),
@@ -385,7 +396,8 @@ class _PersonalInformationScreenBodyState
 
                 // PIN Code Section
                 Text(
-                  (isVietnamese ? 'MÃ PIN BẢO MẬT' : 'SECURITY PIN').toUpperCase(),
+                  (isVietnamese ? 'MÃ PIN BẢO MẬT' : 'SECURITY PIN')
+                      .toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -424,7 +436,9 @@ class _PersonalInformationScreenBodyState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isVietnamese ? 'Mã PIN đồng bộ' : 'Synced PIN Code',
+                                isVietnamese
+                                    ? 'Mã PIN đồng bộ'
+                                    : 'Synced PIN Code',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -434,8 +448,12 @@ class _PersonalInformationScreenBodyState
                               const SizedBox(height: 4),
                               Text(
                                 context.watch<PinProvider>().hasPin
-                                    ? (isVietnamese ? 'Đã thiết lập' : 'Configured')
-                                    : (isVietnamese ? 'Chưa thiết lập' : 'Not configured'),
+                                    ? (isVietnamese
+                                        ? 'Đã thiết lập'
+                                        : 'Configured')
+                                    : (isVietnamese
+                                        ? 'Chưa thiết lập'
+                                        : 'Not configured'),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: context.watch<PinProvider>().hasPin
@@ -458,7 +476,8 @@ class _PersonalInformationScreenBodyState
 
                 // Read-only System Section
                 Text(
-                  (isVietnamese ? 'THÔNG TIN HỆ THỐNG' : 'SYSTEM INFORMATION').toUpperCase(),
+                  (isVietnamese ? 'THÔNG TIN HỆ THỐNG' : 'SYSTEM INFORMATION')
+                      .toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -480,7 +499,10 @@ class _PersonalInformationScreenBodyState
                       // Email
                       _buildReadOnlyField(
                         label: isVietnamese ? 'Địa chỉ Email' : 'Email Address',
-                        value: context.read<UserProfileProvider>().userEmail.isNotEmpty
+                        value: context
+                                .read<UserProfileProvider>()
+                                .userEmail
+                                .isNotEmpty
                             ? context.read<UserProfileProvider>().userEmail
                             : (supabaseUser?.email ?? 'N/A'),
                         icon: Icons.email_outlined,
@@ -489,7 +511,7 @@ class _PersonalInformationScreenBodyState
                         valueColor: textOnCardColor,
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // User ID
                       _buildReadOnlyField(
                         label: isVietnamese ? 'Mã số người dùng' : 'User ID',
@@ -500,7 +522,7 @@ class _PersonalInformationScreenBodyState
                         valueColor: textOnCardColor,
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // Join Date
                       _buildReadOnlyField(
                         label: isVietnamese ? 'Ngày tham gia' : 'Join Date',
@@ -514,7 +536,8 @@ class _PersonalInformationScreenBodyState
 
                       // App Version
                       _buildReadOnlyField(
-                        label: isVietnamese ? 'Phiên bản ứng dụng' : 'App Version',
+                        label:
+                            isVietnamese ? 'Phiên bản ứng dụng' : 'App Version',
                         value: '1.0.0',
                         icon: Icons.verified_user_outlined,
                         bgColor: readOnlyBgColor,
@@ -542,11 +565,13 @@ class _PersonalInformationScreenBodyState
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
                           isVietnamese ? 'Lưu thay đổi' : 'Save Changes',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
               ],
@@ -581,12 +606,18 @@ class _PersonalInformationScreenBodyState
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 11, color: labelColor, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: labelColor,
+                      fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(fontSize: 14, color: valueColor, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: valueColor,
+                      fontWeight: FontWeight.w500),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

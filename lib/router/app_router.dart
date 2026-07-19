@@ -12,7 +12,8 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const AppLaunchGate(child: MainNavigationScreen()),
+        builder: (context, state) =>
+            const AppLaunchGate(child: MainNavigationScreen()),
       ),
       GoRoute(
         path: '/update-password',
@@ -36,7 +37,8 @@ class AppRouter {
 
   static void initializeAuthListener() {
     _authSubscription?.cancel();
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription =
+        Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.passwordRecovery) {
         router.go('/reset-pin');
       }
