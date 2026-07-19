@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:intl/intl.dart';
@@ -73,7 +74,6 @@ class ProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = Localizations.localeOf(context).languageCode;
-    final isVietnamese = localeCode == 'vi';
 
     return Consumer<UserProfileProvider>(
       builder: (context, profile, child) {
@@ -81,7 +81,7 @@ class ProfileSection extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                isVietnamese ? 'SỐ DƯ HIỆN TẠI' : 'CURRENT BALANCE',
+                AppTranslations.getText(localeCode, 'db_current_balance'),
                 style: const TextStyle(
                   fontSize: 18,
                   color: Color(0xFF17CB72),
@@ -120,7 +120,6 @@ class BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = context.watch<CurrencyProvider>().numberFormat;
     final localeCode = Localizations.localeOf(context).languageCode;
-    final isVietnamese = localeCode == 'vi';
 
     return Consumer<TransactionProvider>(
       builder: (context, txProvider, _) {
@@ -136,7 +135,7 @@ class BalanceCard extends StatelessWidget {
             Expanded(
               child: IncomeExpenseTile(
                 icon: Icons.arrow_downward,
-                label: isVietnamese ? 'THU NHẬP' : 'INCOME',
+                label: AppTranslations.getText(localeCode, 'db_income'),
                 amount: currencyFormat.format(income),
                 change: '+12%',
                 valueColor: const Color(0xFFF0FFF6),
@@ -147,7 +146,7 @@ class BalanceCard extends StatelessWidget {
             Expanded(
               child: IncomeExpenseTile(
                 icon: Icons.arrow_upward,
-                label: isVietnamese ? 'CHI TIÊU' : 'EXPENSE',
+                label: AppTranslations.getText(localeCode, 'db_expense'),
                 amount: currencyFormat.format(expense),
                 change: '-5%',
                 valueColor: const Color(0xFFF0FFF6),
@@ -256,7 +255,6 @@ List<DayTransactionGroup> groupByDay(
   List<dynamic> transactions,
 ) {
   final localeCode = Localizations.localeOf(context).languageCode;
-  final isVietnamese = localeCode == 'vi';
   final now = DateTime.now();
   final dayMap = <String, List<dynamic>>{};
   final order = <String>[];
@@ -274,33 +272,45 @@ List<DayTransactionGroup> groupByDay(
 
   return order.map((key) {
     final day = DateTime.fromMillisecondsSinceEpoch(int.parse(key));
-    final heading = formatGroupHeading(day, now, isVietnamese);
+    final heading = formatGroupHeading(day, now, localeCode);
     return DayTransactionGroup(heading: heading, items: dayMap[key]!);
   }).toList();
 }
 
-String formatGroupHeading(DateTime day, DateTime now, bool isVietnamese) {
+String formatGroupHeading(DateTime day, DateTime now, String languageCode) {
   final today = DateTime(now.year, now.month, now.day);
   final yesterday = today.subtract(const Duration(days: 1));
   final comparingDay = DateTime(day.year, day.month, day.day);
 
   if (comparingDay == today) {
-    return isVietnamese
-        ? 'HÔM NAY, ${DateFormat('d \'THÁNG\' M', 'vi').format(day)}'
-        : 'TODAY, ${DateFormat('MMM d', 'en').format(day).toUpperCase()}';
+    if (languageCode == 'vi') {
+      return 'HÔM NAY, ${DateFormat('d \'THÁNG\' M', 'vi').format(day)}';
+    } else if (languageCode == 'ko') {
+      return '오늘, ${DateFormat('M월 d일', 'ko').format(day)}';
+    } else {
+      return 'TODAY, ${DateFormat('MMM d', 'en').format(day).toUpperCase()}';
+    }
   }
   if (comparingDay == yesterday) {
-    return isVietnamese
-        ? 'HÔM QUA, ${DateFormat('d \'THÁNG\' M', 'vi').format(day)}'
-        : 'YESTERDAY, ${DateFormat('MMM d', 'en').format(day).toUpperCase()}';
+    if (languageCode == 'vi') {
+      return 'HÔM QUA, ${DateFormat('d \'THÁNG\' M', 'vi').format(day)}';
+    } else if (languageCode == 'ko') {
+      return '어제, ${DateFormat('M월 d일', 'ko').format(day)}';
+    } else {
+      return 'YESTERDAY, ${DateFormat('MMM d', 'en').format(day).toUpperCase()}';
+    }
   }
 
-  return isVietnamese
-      ? DateFormat('d \'THÁNG\' M', 'vi').format(day).toUpperCase()
-      : DateFormat('MMM d, yyyy', 'en').format(day).toUpperCase();
+  if (languageCode == 'vi') {
+    return DateFormat('d \'THÁNG\' M', 'vi').format(day).toUpperCase();
+  } else if (languageCode == 'ko') {
+    return DateFormat('yyyy년 M월 d일', 'ko').format(day);
+  } else {
+    return DateFormat('MMM d, yyyy', 'en').format(day).toUpperCase();
+  }
 }
 
-TxVisualMeta getTxMeta(String title, bool isIncome, bool isVietnamese) {
+TxVisualMeta getTxMeta(String title, bool isIncome, String languageCode) {
   final lower = title.toLowerCase();
   if (lower.contains('ăn') ||
       lower.contains('trưa') ||
@@ -309,7 +319,7 @@ TxVisualMeta getTxMeta(String title, bool isIncome, bool isVietnamese) {
       icon: Icons.restaurant,
       iconBg: const Color(0xFF4F3A11),
       iconColor: const Color(0xFFFF9B29),
-      subtitle: isVietnamese ? 'Ăn uống' : 'Food',
+      subtitle: AppTranslations.getText(languageCode, 'cat_food'),
     );
   }
   if (lower.contains('xăng') || lower.contains('xe') || lower.contains('gas')) {
@@ -317,7 +327,7 @@ TxVisualMeta getTxMeta(String title, bool isIncome, bool isVietnamese) {
       icon: Icons.directions_car,
       iconBg: const Color(0xFF1A3850),
       iconColor: const Color(0xFF4AA3FF),
-      subtitle: isVietnamese ? 'Di chuyển' : 'Transport',
+      subtitle: AppTranslations.getText(languageCode, 'cat_transport'),
     );
   }
   if (lower.contains('lương') || lower.contains('salary') || isIncome) {
@@ -325,14 +335,14 @@ TxVisualMeta getTxMeta(String title, bool isIncome, bool isVietnamese) {
       icon: Icons.payments,
       iconBg: const Color(0xFF0B5A30),
       iconColor: const Color(0xFF2CFF7D),
-      subtitle: isVietnamese ? 'Thu nhập' : 'Income',
+      subtitle: AppTranslations.getText(languageCode, 'cat_income'),
     );
   }
   return TxVisualMeta(
     icon: isIncome ? Icons.south_west : Icons.north_east,
     iconBg: const Color(0xFF343651),
     iconColor: const Color(0xFFA7B2FF),
-    subtitle: isVietnamese ? 'Khác' : 'Other',
+    subtitle: AppTranslations.getText(languageCode, 'cat_other'),
   );
 }
 
@@ -342,13 +352,12 @@ class RecentHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeCode = Localizations.localeOf(context).languageCode;
-    final isVietnamese = localeCode == 'vi';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
-            isVietnamese ? 'Lịch sử giao dịch' : 'Transaction History',
+            AppTranslations.getText(localeCode, 'db_history'),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -363,7 +372,7 @@ class RecentHeader extends StatelessWidget {
         TextButton(
           onPressed: () {},
           child: Text(
-            isVietnamese ? 'Tất cả' : 'All',
+            AppTranslations.getText(localeCode, 'db_all'),
             style: const TextStyle(
               color: Color(0xFF20F27F),
               fontSize: 22,
@@ -383,7 +392,6 @@ class RecentList extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = context.watch<CurrencyProvider>().numberFormat;
     final localeCode = Localizations.localeOf(context).languageCode;
-    final isVietnamese = localeCode == 'vi';
 
     return Consumer<TransactionProvider>(
       builder: (context, txProvider, _) {
@@ -405,7 +413,7 @@ class RecentList extends StatelessWidget {
               border: Border.all(color: const Color(0xFF11653F), width: 1),
             ),
             child: Text(
-              isVietnamese ? 'Chưa có giao dịch nào' : 'No transactions yet',
+              AppTranslations.getText(localeCode, 'db_empty'),
               style: const TextStyle(
                 color: Color(0xFFC7D9D0),
                 fontSize: 16,
@@ -424,7 +432,7 @@ class RecentList extends StatelessWidget {
               heading: group.heading,
               entries: group.items,
               currencyFormat: currencyFormat,
-              isVietnamese: isVietnamese,
+              languageCode: localeCode,
             );
           }).toList(),
         );
@@ -437,14 +445,14 @@ class TransactionGroupSection extends StatelessWidget {
   final String heading;
   final List<dynamic> entries;
   final NumberFormat currencyFormat;
-  final bool isVietnamese;
+  final String languageCode;
 
   const TransactionGroupSection({
     super.key,
     required this.heading,
     required this.entries,
     required this.currencyFormat,
-    required this.isVietnamese,
+    required this.languageCode,
   });
 
   @override
@@ -469,7 +477,7 @@ class TransactionGroupSection extends StatelessWidget {
               final isIncome = tx.amount >= 0;
               final amountText =
                   '${isIncome ? '+' : '-'}${currencyFormat.format(tx.amount.abs())}';
-              final meta = getTxMeta(tx.title, isIncome, isVietnamese);
+              final meta = getTxMeta(tx.title, isIncome, languageCode);
 
               return TransactionRow(
                 icon: meta.icon,
