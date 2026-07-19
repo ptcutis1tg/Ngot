@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/app_lock_settings_screen.dart';
 import 'package:flutter_application_1/firstscreen/personal_information_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
@@ -217,31 +218,36 @@ class AccountSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appSettings = context.watch<AppSettingsProvider>();
+    final languageCode = appSettings.languageCode;
+    final String langName = switch (languageCode) {
+      'vi' => 'Tiếng Việt',
+      'ko' => '한국어',
+      _ => 'English',
+    };
+
     return Column(
       children: [
         SettingTile(
           icon: Icons.person_outline,
-          title: 'Personal information',
+          title: AppTranslations.getText(languageCode, 'st_personal_info'),
           trailingText: null,
           onTap: onEditPersonal,
         ),
         Consumer<CurrencyProvider>(
           builder: (context, currencyProvider, _) => SettingTile(
             icon: Icons.currency_exchange,
-            title: 'Currency',
+            title: AppTranslations.getText(languageCode, 'st_currency'),
             trailingText:
                 '${currencyProvider.selected.code} (${currencyProvider.selected.symbol})',
             onTap: () => onOpenCurrency(currencyProvider),
           ),
         ),
-        Consumer<AppSettingsProvider>(
-          builder: (context, appSettings, _) => SettingTile(
-            icon: Icons.language,
-            title: 'Language',
-            trailingText:
-                appSettings.languageCode == 'vi' ? 'Tiếng Việt' : 'English',
-            onTap: () => onOpenLanguage(appSettings),
-          ),
+        SettingTile(
+          icon: Icons.language,
+          title: AppTranslations.getText(languageCode, 'st_language'),
+          trailingText: langName,
+          onTap: () => onOpenLanguage(appSettings),
         ),
       ],
     );
@@ -253,12 +259,15 @@ class SecuritySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appSettings = context.watch<AppSettingsProvider>();
+    final languageCode = appSettings.languageCode;
+
     return Column(
       children: [
-        const SectionTitle('Security & App'),
+        SectionTitle(AppTranslations.getText(languageCode, 'st_security_app')),
         SettingTile(
           icon: Icons.lock_outline,
-          title: 'Mã khoá ứng dụng',
+          title: AppTranslations.getText(languageCode, 'st_passcode'),
           trailingText: null,
           onTap: () async {
             Navigator.of(context).push(
@@ -268,27 +277,23 @@ class SecuritySection extends StatelessWidget {
             );
           },
         ),
-        const SettingTile(
+        SettingTile(
           icon: Icons.fingerprint,
-          title: 'Biometric lock',
-          trailingText: 'Coming soon',
+          title: AppTranslations.getText(languageCode, 'st_biometric'),
+          trailingText: AppTranslations.getText(languageCode, 'st_biometric_coming'),
           onTap: null,
         ),
-        Consumer<AppSettingsProvider>(
-          builder: (context, appSettings, _) => SettingSwitchTile(
-            icon: Icons.notifications_none,
-            title: 'Notifications',
-            value: appSettings.notificationsEnabled,
-            onChanged: appSettings.setNotificationsEnabled,
-          ),
+        SettingSwitchTile(
+          icon: Icons.notifications_none,
+          title: AppTranslations.getText(languageCode, 'st_notifications'),
+          value: appSettings.notificationsEnabled,
+          onChanged: appSettings.setNotificationsEnabled,
         ),
-        Consumer<AppSettingsProvider>(
-          builder: (context, appSettings, _) => SettingSwitchTile(
-            icon: Icons.dark_mode_outlined,
-            title: 'Dark mode',
-            value: appSettings.darkMode,
-            onChanged: appSettings.setDarkMode,
-          ),
+        SettingSwitchTile(
+          icon: Icons.dark_mode_outlined,
+          title: AppTranslations.getText(languageCode, 'st_dark_mode'),
+          value: appSettings.darkMode,
+          onChanged: appSettings.setDarkMode,
         ),
       ],
     );
@@ -303,18 +308,20 @@ class SupportSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+
     return Column(
       children: [
-        const SectionTitle('Support'),
+        SectionTitle(AppTranslations.getText(languageCode, 'st_support')),
         SettingTile(
           icon: Icons.help_outline,
-          title: 'Help center',
+          title: AppTranslations.getText(languageCode, 'st_help_center'),
           trailingText: null,
           onTap: onHelp,
         ),
         SettingTile(
           icon: Icons.info_outline,
-          title: 'About app',
+          title: AppTranslations.getText(languageCode, 'st_about_app'),
           trailingText: 'v1.0.0',
           onTap: onAbout,
         ),
@@ -331,13 +338,15 @@ class BackupSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+
     return Column(
       children: [
-        const SectionTitle('Local & Backup'),
+        SectionTitle(AppTranslations.getText(languageCode, 'st_local_backup')),
         Consumer<BackupProvider>(
           builder: (localContext, backupProvider, _) {
             final lastBackupText = backupProvider.lastBackupAt == null
-                ? 'Never'
+                ? AppTranslations.getText(languageCode, 'st_last_backup_never')
                 : DateFormat('yyyy-MM-dd HH:mm')
                     .format(backupProvider.lastBackupAt!);
 
@@ -346,7 +355,7 @@ class BackupSection extends StatelessWidget {
                 Container(
                   color: layerColor(context, 1),
                   child: SwitchListTile(
-                    title: const Text('Enable server backup'),
+                    title: Text(AppTranslations.getText(languageCode, 'st_enable_backup')),
                     value: backupProvider.enabled,
                     onChanged: backupProvider.setEnabled,
                   ),
@@ -358,10 +367,10 @@ class BackupSection extends StatelessWidget {
                       Icons.cloud_upload_outlined,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    title: const Text('Backup endpoint'),
+                    title: Text(AppTranslations.getText(languageCode, 'st_backup_endpoint')),
                     subtitle: Text(
                       backupProvider.serverUrl.isEmpty
-                          ? 'Not configured'
+                          ? AppTranslations.getText(languageCode, 'st_backup_not_configured')
                           : backupProvider.serverUrl,
                     ),
                     trailing: const Icon(Icons.chevron_right, color: Colors.grey),
@@ -375,7 +384,7 @@ class BackupSection extends StatelessWidget {
                       Icons.history,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    title: const Text('Last backup'),
+                    title: Text(AppTranslations.getText(languageCode, 'st_last_backup')),
                     subtitle: Text(
                         '$lastBackupText - ${backupProvider.lastBackupStatus}'),
                   ),
@@ -401,8 +410,8 @@ class BackupSection extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   ok
-                                      ? 'Backup completed successfully'
-                                      : 'Backup failed, check endpoint config',
+                                      ? AppTranslations.getText(languageCode, 'st_backup_success')
+                                      : AppTranslations.getText(languageCode, 'st_backup_failed'),
                                 ),
                               ),
                             );
@@ -414,7 +423,7 @@ class BackupSection extends StatelessWidget {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.backup_outlined),
-                    label: const Text('Backup now'),
+                    label: Text(AppTranslations.getText(languageCode, 'st_backup_now')),
                   ),
                 ),
               ],
@@ -431,6 +440,8 @@ class LogoutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(
@@ -440,16 +451,16 @@ class LogoutSection extends StatelessWidget {
             final ok = await showDialog<bool>(
                   context: context,
                   builder: (dialogContext) => AlertDialog(
-                    title: const Text('Logout'),
-                    content: const Text('Are you sure you want to logout?'),
+                    title: Text(AppTranslations.getText(languageCode, 'st_logout_confirm_title')),
+                    content: Text(AppTranslations.getText(languageCode, 'st_logout_confirm_body')),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(false),
-                        child: const Text('Cancel'),
+                        child: Text(AppTranslations.getText(languageCode, 'st_cancel')),
                       ),
                       ElevatedButton(
                         onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: const Text('Logout'),
+                        child: Text(AppTranslations.getText(languageCode, 'st_logout')),
                       ),
                     ],
                   ),
@@ -467,8 +478,10 @@ class LogoutSection extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text('Logout',
-              style: TextStyle(fontWeight: FontWeight.bold)),
+          child: Text(
+            AppTranslations.getText(languageCode, 'st_logout'),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/widget/settings/avatar_display_options_sheet.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -70,15 +71,13 @@ class _PersonalInformationScreenBodyState
 
       if (!mounted) return;
       
-      final isVietnamese =
-          context.read<AppSettingsProvider>().languageCode == 'vi';
+      final languageCode =
+          context.read<AppSettingsProvider>().languageCode;
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isVietnamese
-                ? 'Đã lưu thông tin cá nhân thành công'
-                : 'Saved personal information successfully',
+            AppTranslations.getText(languageCode, 'pi_save_success'),
           ),
           backgroundColor: const Color(0xFF2ECC71),
         ),
@@ -205,7 +204,8 @@ class _PersonalInformationScreenBodyState
   Widget build(BuildContext context) {
     final appSettings = context.watch<AppSettingsProvider>();
     final userProfile = context.watch<UserProfileProvider>();
-    final isVietnamese = appSettings.languageCode == 'vi';
+    final languageCode = appSettings.languageCode;
+    final isVietnamese = languageCode == 'vi';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     // Theme colors matching the premium look of the app
@@ -223,17 +223,17 @@ class _PersonalInformationScreenBodyState
     if (rawCreatedAt != null) {
       try {
         final parsedDate = DateTime.parse(rawCreatedAt);
-        joinDate = DateFormat(isVietnamese ? 'dd/MM/yyyy' : 'MM/dd/yyyy').format(parsedDate);
+        joinDate = DateFormat(languageCode == 'vi' ? 'dd/MM/yyyy' : 'MM/dd/yyyy').format(parsedDate);
       } catch (_) {
         joinDate = rawCreatedAt;
       }
     } else {
-      joinDate = isVietnamese ? 'Hôm nay' : 'Today';
+      joinDate = AppTranslations.getText(languageCode, 'pi_join_date_today', defaultValue: languageCode == 'vi' ? 'Hôm nay' : (languageCode == 'ko' ? '오늘' : 'Today'));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isVietnamese ? 'Thông tin cá nhân' : 'Personal Information'),
+        title: Text(AppTranslations.getText(languageCode, 'pi_title')),
         actions: [
           if (_isSaving)
             const Padding(
@@ -250,7 +250,7 @@ class _PersonalInformationScreenBodyState
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: _save,
-              tooltip: isVietnamese ? 'Lưu' : 'Save',
+              tooltip: AppTranslations.getText(languageCode, 'pi_save_tooltip'),
             ),
         ],
       ),
@@ -307,7 +307,7 @@ class _PersonalInformationScreenBodyState
 
                 // Editable Fields Section
                 Text(
-                  (isVietnamese ? 'THÔNG TIN CÁ NHÂN' : 'PERSONAL INFORMATION').toUpperCase(),
+                  AppTranslations.getText(languageCode, 'pi_title').toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -332,14 +332,12 @@ class _PersonalInformationScreenBodyState
                         style: TextStyle(color: textOnCardColor),
                         decoration: _fieldDecoration(
                           context: context,
-                          labelText: isVietnamese ? 'Họ và tên' : 'Full name',
+                          labelText: AppTranslations.getText(languageCode, 'pi_full_name'),
                           icon: Icons.person_outline,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return isVietnamese
-                                ? 'Vui lòng nhập họ và tên'
-                                : 'Please enter full name';
+                            return AppTranslations.getText(languageCode, 'pi_error_name');
                           }
                           return null;
                         },
@@ -352,14 +350,12 @@ class _PersonalInformationScreenBodyState
                         style: TextStyle(color: textOnCardColor),
                         decoration: _fieldDecoration(
                           context: context,
-                          labelText: isVietnamese ? 'Tên người dùng' : 'Username',
+                          labelText: AppTranslations.getText(languageCode, 'pi_username'),
                           icon: Icons.alternate_email,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return isVietnamese
-                                ? 'Vui lòng nhập tên người dùng'
-                                : 'Please enter username';
+                            return AppTranslations.getText(languageCode, 'pi_error_username');
                           }
                           return null;
                         },
@@ -373,7 +369,7 @@ class _PersonalInformationScreenBodyState
                         maxLines: 3,
                         decoration: _fieldDecoration(
                           context: context,
-                          labelText: isVietnamese ? 'Mô tả bản thân' : 'Biography',
+                          labelText: AppTranslations.getText(languageCode, 'pi_bio'),
                           icon: Icons.description_outlined,
                         ),
                       ),
@@ -384,7 +380,7 @@ class _PersonalInformationScreenBodyState
 
                 // Read-only System Section
                 Text(
-                  (isVietnamese ? 'THÔNG TIN HỆ THỐNG' : 'SYSTEM INFORMATION').toUpperCase(),
+                  AppTranslations.getText(languageCode, 'pi_system_info').toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -405,7 +401,7 @@ class _PersonalInformationScreenBodyState
                     children: [
                       // Email
                       _buildReadOnlyField(
-                        label: isVietnamese ? 'Địa chỉ Email' : 'Email Address',
+                        label: AppTranslations.getText(languageCode, 'pi_email'),
                         value: userProfile.userEmail.isNotEmpty
                             ? userProfile.userEmail
                             : (supabaseUser?.email ?? 'N/A'),
@@ -418,7 +414,7 @@ class _PersonalInformationScreenBodyState
                       
                       // User ID
                       _buildReadOnlyField(
-                        label: isVietnamese ? 'Mã số người dùng' : 'User ID',
+                        label: AppTranslations.getText(languageCode, 'pi_user_id'),
                         value: userId,
                         icon: Icons.badge_outlined,
                         bgColor: readOnlyBgColor,
@@ -429,7 +425,7 @@ class _PersonalInformationScreenBodyState
                       
                       // Join Date
                       _buildReadOnlyField(
-                        label: isVietnamese ? 'Ngày tham gia' : 'Join Date',
+                        label: AppTranslations.getText(languageCode, 'pi_join_date'),
                         value: joinDate,
                         icon: Icons.calendar_today_outlined,
                         bgColor: readOnlyBgColor,
@@ -440,7 +436,7 @@ class _PersonalInformationScreenBodyState
 
                       // App Version
                       _buildReadOnlyField(
-                        label: isVietnamese ? 'Phiên bản ứng dụng' : 'App Version',
+                        label: AppTranslations.getText(languageCode, 'pi_app_version'),
                         value: '1.0.0',
                         icon: Icons.verified_user_outlined,
                         bgColor: readOnlyBgColor,
@@ -471,7 +467,7 @@ class _PersonalInformationScreenBodyState
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
-                          isVietnamese ? 'Lưu thay đổi' : 'Save Changes',
+                          AppTranslations.getText(languageCode, 'pi_save_changes'),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
