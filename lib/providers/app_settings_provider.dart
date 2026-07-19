@@ -123,6 +123,15 @@ class AppSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setPinLockEnabled(bool value) async {
+    if (_pinLockEnabled == value) return;
+
+    _pinLockEnabled = value;
+    final prefs = await _prefsFuture;
+    await prefs.setBool(_pinLockEnabledKey, value);
+    notifyListeners();
+  }
+
   Future<String?> changePassword({
     required String currentPassword,
     required String newPassword,

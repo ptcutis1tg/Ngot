@@ -8,7 +8,8 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const AppLaunchGate(child: MainNavigationScreen()),
+        builder: (context, state) =>
+            const AppLaunchGate(child: MainNavigationScreen()),
       ),
     ],
   );

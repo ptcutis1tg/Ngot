@@ -8,6 +8,8 @@ import 'package:flutter_application_1/firstscreen/widget/settings/avatar_display
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:flutter_application_1/providers/pin_provider.dart';
+import 'package:flutter_application_1/firstscreen/pin_settings_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -119,7 +121,7 @@ class _PersonalInformationScreenBodyState
     final persistedAvatar = await _persistFinalAvatarSelection(
       selectedAvatar.trim(),
     );
-    
+
     setState(() {
       _avatarPath = persistedAvatar;
     });
@@ -178,9 +180,8 @@ class _PersonalInformationScreenBodyState
       return value;
     }
 
-    final normalizedPath = value.startsWith('file://')
-        ? Uri.parse(value).toFilePath()
-        : value;
+    final normalizedPath =
+        value.startsWith('file://') ? Uri.parse(value).toFilePath() : value;
     final source = File(normalizedPath);
     if (!source.existsSync()) {
       return _avatarPath;
@@ -206,13 +207,18 @@ class _PersonalInformationScreenBodyState
     final userProfile = context.watch<UserProfileProvider>();
     final languageCode = appSettings.languageCode;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Theme colors matching the premium look of the app
-    final cardBgColor = isDark ? const Color(0xFF0F3124) : const Color(0xFFF0F5F2);
-    final borderColor = isDark ? const Color(0xFF165C40) : const Color(0xFFD0E0D8);
-    final textOnCardColor = isDark ? const Color(0xFFE5F4EB) : const Color(0xFF103A27);
-    final labelColor = isDark ? const Color(0xFF98AF9F) : const Color(0xFF557F67);
-    final readOnlyBgColor = isDark ? const Color(0xFF082218) : const Color(0xFFE5EDE9);
+    final cardBgColor =
+        isDark ? const Color(0xFF0F3124) : const Color(0xFFF0F5F2);
+    final borderColor =
+        isDark ? const Color(0xFF165C40) : const Color(0xFFD0E0D8);
+    final textOnCardColor =
+        isDark ? const Color(0xFFE5F4EB) : const Color(0xFF103A27);
+    final labelColor =
+        isDark ? const Color(0xFF98AF9F) : const Color(0xFF557F67);
+    final readOnlyBgColor =
+        isDark ? const Color(0xFF082218) : const Color(0xFFE5EDE9);
 
     // Get current User Metadata from Supabase
     final supabaseUser = Supabase.instance.client.auth.currentUser;
@@ -241,7 +247,8 @@ class _PersonalInformationScreenBodyState
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
                 ),
               ),
             )
@@ -270,7 +277,8 @@ class _PersonalInformationScreenBodyState
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFF2ECC71), width: 3),
+                          border: Border.all(
+                              color: const Color(0xFF2ECC71), width: 3),
                         ),
                         child: CircleAvatar(
                           key: ValueKey<String>(_avatarPath),
@@ -315,7 +323,7 @@ class _PersonalInformationScreenBodyState
                   ),
                 ),
                 const SizedBox(height: 10),
-                
+
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -342,7 +350,7 @@ class _PersonalInformationScreenBodyState
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Username (Tên người dùng)
                       TextFormField(
                         controller: _usernameController,
@@ -360,7 +368,7 @@ class _PersonalInformationScreenBodyState
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Bio (Mô tả bản thân)
                       TextFormField(
                         controller: _bioController,
@@ -373,6 +381,86 @@ class _PersonalInformationScreenBodyState
                         ),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // PIN Code Section
+                Text(
+                  (isVietnamese ? 'MÃ PIN BẢO MẬT' : 'SECURITY PIN')
+                      .toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: labelColor,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PinSettingsScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: cardBgColor,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: borderColor, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.lock_outline,
+                          color: Color(0xFF2ECC71),
+                          size: 28,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isVietnamese
+                                    ? 'Mã PIN đồng bộ'
+                                    : 'Synced PIN Code',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: textOnCardColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.watch<PinProvider>().hasPin
+                                    ? (isVietnamese
+                                        ? 'Đã thiết lập'
+                                        : 'Configured')
+                                    : (isVietnamese
+                                        ? 'Chưa thiết lập'
+                                        : 'Not configured'),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.watch<PinProvider>().hasPin
+                                      ? const Color(0xFF2ECC71)
+                                      : labelColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: labelColor,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -410,7 +498,7 @@ class _PersonalInformationScreenBodyState
                         valueColor: textOnCardColor,
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // User ID
                       _buildReadOnlyField(
                         label: AppTranslations.getText(languageCode, 'pi_user_id'),
@@ -421,7 +509,7 @@ class _PersonalInformationScreenBodyState
                         valueColor: textOnCardColor,
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // Join Date
                       _buildReadOnlyField(
                         label: AppTranslations.getText(languageCode, 'pi_join_date'),
@@ -463,7 +551,8 @@ class _PersonalInformationScreenBodyState
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
                           AppTranslations.getText(languageCode, 'pi_save_changes'),
@@ -502,12 +591,18 @@ class _PersonalInformationScreenBodyState
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 11, color: labelColor, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: labelColor,
+                      fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(fontSize: 14, color: valueColor, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: valueColor,
+                      fontWeight: FontWeight.w500),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

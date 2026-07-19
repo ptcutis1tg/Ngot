@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/firstscreen/pin_lock_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
@@ -16,7 +17,8 @@ class AppLaunchGate extends StatefulWidget {
   State<AppLaunchGate> createState() => _AppLaunchGateState();
 }
 
-class _AppLaunchGateState extends State<AppLaunchGate> {
+class _AppLaunchGateState extends State<AppLaunchGate>
+    with WidgetsBindingObserver {
   bool _isLoading = true;
   bool _completedOnboarding = false;
   StreamSubscription<AuthState>? _authSubscription;
@@ -24,6 +26,7 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadOnboardingStatus();
     
     // Listen to Supabase auth state changes and sync with UserProfileProvider
@@ -46,6 +49,20 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
     super.dispose();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      setState(() => _isUnlocked = false);
+    }
+  }
+
   Future<void> _loadOnboardingStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final completed = prefs.getBool('onboarding_completed') ?? false;
@@ -63,6 +80,10 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
     setState(() => _completedOnboarding = true);
   }
 
+  void _onPinUnlocked() {
+    setState(() => _isUnlocked = true);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -78,6 +99,14 @@ class _AppLaunchGateState extends State<AppLaunchGate> {
         final isLoggedIn = session != null;
 
         if (isLoggedIn && _completedOnboarding) {
+          final appSettings = context.watch<AppSettingsProvider>();
+          final pinProvider = context.watch<PinProvider>();
+          // Only show lock screen if PIN lock is enabled and user has a PIN
+          if (appSettings.pinLockEnabled &&
+              pinProvider.hasPin &&
+              !_isUnlocked) {
+            return PinLockScreen(onUnlocked: _onPinUnlocked);
+          }
           return widget.child;
         }
 
@@ -107,7 +136,7 @@ class OnboardingFlow extends StatefulWidget {
 class _OnboardingFlowState extends State<OnboardingFlow> {
   late int _step;
   String _selectedLanguageCode = 'vi';
-  
+
   // Auth states
   bool _isLoginView = true;
   bool _isForgotPasswordView = false;
@@ -254,6 +283,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   Future<void> _handlePostAuth() async {
+    try {
+      await context.read<PinProvider>().refresh();
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('authMode', 'login');
     if (!mounted) return;
@@ -432,7 +464,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2),
                     )
                   : Text(_isForgotPasswordView
                       ? AppTranslations.getText(_selectedLanguageCode, 'ob_submit_email')
@@ -622,7 +655,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 return Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFF2ECC71).withValues(alpha: 0.12),
+                      backgroundColor:
+                          const Color(0xFF2ECC71).withValues(alpha: 0.12),
                       child: Text('${index + 1}'),
                     ),
                     title: Text(feature.$1),
