@@ -173,9 +173,10 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
     final value = _evaluate().abs().toStringAsFixed(2);
     final appSettings = context.watch<AppSettingsProvider>();
     final languageCode = appSettings.languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: const Color(0xFF041F14),
+      color: isDark ? const Color(0xFF041F14) : const Color(0xFFF0F9F4),
       child: SafeArea(
         child: Container(
           decoration: const BoxDecoration(
@@ -250,17 +251,17 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                   final result = await showDialog<String>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      backgroundColor: const Color(0xFF0C3A24),
+                      backgroundColor: isDark ? const Color(0xFF0C3A24) : const Color(0xFFFFFFFF),
                       title: Text(
                         AppTranslations.getText(languageCode, 'add_tx_add_note'),
-                        style: const TextStyle(color: Color(0xFFE9F5EE)),
+                        style: TextStyle(color: isDark ? const Color(0xFFE9F5EE) : const Color(0xFF0A3825)),
                       ),
                       content: TextField(
                         controller: controller,
-                        style: const TextStyle(color: Color(0xFFE9F5EE)),
+                        style: TextStyle(color: isDark ? const Color(0xFFE9F5EE) : const Color(0xFF0A3825)),
                         decoration: InputDecoration(
                           hintText: AppTranslations.getText(languageCode, 'add_tx_type_note'),
-                          hintStyle: const TextStyle(color: Color(0xFF6E8D7E)),
+                          hintStyle: TextStyle(color: isDark ? const Color(0xFF6E8D7E) : const Color(0xFF8FA39B)),
                         ),
                       ),
                       actions: [
@@ -444,6 +445,7 @@ class _CircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       borderRadius: BorderRadius.circular(28),
       onTap: onTap,
@@ -451,10 +453,10 @@ class _CircleButton extends StatelessWidget {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-          color: const Color(0xFF0A3B24),
+          color: isDark ? const Color(0xFF0A3B24) : const Color(0xFFC7E6D6),
           borderRadius: BorderRadius.circular(28),
         ),
-        child: Icon(icon, color: const Color(0xFF1CF07B), size: 30),
+        child: Icon(icon, color: isDark ? const Color(0xFF1CF07B) : const Color(0xFF12A15B), size: 30),
       ),
     );
   }
@@ -511,7 +513,7 @@ class _Numpad extends StatelessWidget {
             _NumberKey(
               label: '⌫',
               onTap: onBackspace,
-              child: const Icon(Icons.backspace_outlined, color: Color(0xFFD6E6DE)),
+              child: Icon(Icons.backspace_outlined, color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFFD6E6DE) : const Color(0xFF0A3825)),
             ),
             _NumberKey(label: '+', isOp: true, onTap: () => onOp('+')),
           ],
@@ -551,6 +553,7 @@ class _NumberKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),

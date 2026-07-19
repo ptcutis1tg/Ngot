@@ -247,8 +247,8 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
 
   @override
   Widget build(BuildContext context) {
-    final languageCode =
-        context.watch<AppSettingsProvider>().languageCode;
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBody: true,
@@ -263,9 +263,9 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
         children: _pages,
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF032717),
-          border: Border(top: BorderSide(color: Color(0xFF0E5B3A), width: 1)),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF032717) : const Color(0xFFFFFFFF),
+          border: Border(top: BorderSide(color: isDark ? const Color(0xFF0E5B3A) : const Color(0xFFE2F3E9), width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
@@ -274,7 +274,7 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: const Color(0xFF1CF07B),
-          unselectedItemColor: const Color(0xFF98A99F),
+          unselectedItemColor: isDark ? const Color(0xFF98A99F) : const Color(0xFF5E856F),
           selectedLabelStyle: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
