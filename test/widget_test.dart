@@ -18,6 +18,18 @@ import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:flutter_application_1/providers/pin_provider.dart';
+
+class _FakePinAuth implements PinAuthClient {
+  @override
+  Map<String, dynamic>? get userMetadata => {};
+  @override
+  String? get email => 'test@example.com';
+  @override
+  Future<void> updateMetadata(Map<String, dynamic> value) async {}
+  @override
+  Future<void> sendRecoveryEmail(String email, String otp) async {}
+}
 
 void main() {
   testWidgets('DailyExpenseApp smoke test', (WidgetTester tester) async {
@@ -48,6 +60,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => BackupProvider()),
           ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
           ChangeNotifierProvider(create: (_) => CurrencyProvider()),
+          ChangeNotifierProvider(create: (_) => PinProvider(_FakePinAuth())),
         ],
         child: const MaterialApp(
           localizationsDelegates: [
