@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/app_lock_settings_screen.dart';
+import 'package:flutter_application_1/firstscreen/personal_information_screen.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
@@ -163,38 +164,69 @@ class ProfileHeader extends StatelessWidget {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
         final theme = Theme.of(context);
-        return Container(
-          padding: const EdgeInsets.all(20),
-          color: layerColor(context, 1),
-          child: Row(
-            children: [
-              CircleAvatar(
-                key: ValueKey<String>(userProfile.userAvatar),
-                radius: 35,
-                backgroundImage: avatarProvider(userProfile.userAvatar),
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const PersonalInformationScreen(),
               ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            color: layerColor(context, 1),
+            child: Row(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    Text(
-                      userProfile.userName.isNotEmpty
-                          ? userProfile.userName
-                          : 'Guest',
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                    CircleAvatar(
+                      key: ValueKey<String>(userProfile.userAvatar),
+                      radius: 35,
+                      backgroundImage: avatarProvider(userProfile.userAvatar),
                     ),
-                    Text(
-                      userProfile.userEmail.isNotEmpty
-                          ? userProfile.userEmail
-                          : 'No email',
-                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2ECC71),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userProfile.userName.isNotEmpty
+                            ? userProfile.userName
+                            : 'Guest',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        userProfile.userEmail.isNotEmpty
+                            ? userProfile.userEmail
+                            : 'No email',
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
