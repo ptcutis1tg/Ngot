@@ -14,6 +14,7 @@ class AppSettingsProvider extends ChangeNotifier {
   static const String _passwordHashKey = 'settings_app_password_hash';
   static const String _languageCodeKey = 'settings_language_code';
   static const String _settingsUpdatedAtKey = 'settings_updated_at';
+  static const String _pinLockEnabledKey = 'settings_pin_lock_enabled';
 
   final Future<SharedPreferences> _prefsFuture =
       SharedPreferences.getInstance();
@@ -25,6 +26,7 @@ class AppSettingsProvider extends ChangeNotifier {
   String _passwordHash = '';
   String _languageCode = 'vi';
   DateTime _settingsUpdatedAt = DateTime.fromMillisecondsSinceEpoch(0);
+  bool _pinLockEnabled = false;
 
   bool get darkMode => _darkMode;
   bool get notificationsEnabled => _notificationsEnabled;
@@ -33,6 +35,7 @@ class AppSettingsProvider extends ChangeNotifier {
   Locale get locale => Locale(_languageCode);
   bool get hasPassword => _passwordHash.isNotEmpty;
   DateTime get settingsUpdatedAt => _settingsUpdatedAt;
+  bool get pinLockEnabled => _pinLockEnabled;
 
   Future<void> _markUpdated(SharedPreferences prefs) async {
     _settingsUpdatedAt = DateTime.now();
@@ -58,6 +61,7 @@ class AppSettingsProvider extends ChangeNotifier {
     if (updatedAtStr != null) {
       _settingsUpdatedAt = DateTime.tryParse(updatedAtStr) ?? DateTime.fromMillisecondsSinceEpoch(0);
     }
+    _pinLockEnabled = prefs.getBool(_pinLockEnabledKey) ?? false;
     _loaded = true;
     notifyListeners();
   }
