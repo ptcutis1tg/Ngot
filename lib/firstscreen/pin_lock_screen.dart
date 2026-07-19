@@ -16,12 +16,36 @@ class PinLockScreen extends StatefulWidget {
 class _PinLockScreenState extends State<PinLockScreen> {
   final _pinController = TextEditingController();
   String? _errorMessage;
+  String? _recoveryMessage;
   int _attempts = 0;
+  bool _isSendingRecovery = false;
 
   @override
   void dispose() {
     _pinController.dispose();
     super.dispose();
+  }
+
+  Future<void> _sendRecoveryEmail() async {
+    setState(() {
+      _isSendingRecovery = true;
+      _recoveryMessage = null;
+    });
+
+    final pinProvider = context.read<PinProvider>();
+    final error = await pinProvider.sendRecoveryEmail();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isSendingRecovery = false;
+      if (error == null) {
+        _recoveryMessage =
+            'Đã gửi email khôi phục. Vui lòng kiểm tra hộp thư và nhấn vào liên kết để đặt PIN mới.';
+      } else {
+        _recoveryMessage = error;
+      }
+    });
   }
 
   void _onPinChanged(String value) {
@@ -146,16 +170,34 @@ class _PinLockScreenState extends State<PinLockScreen> {
                 ),
               ],
               const SizedBox(height: 24),
-              Text(
-                isVietnamese
-                    ? 'Quên PIN? Sử dụng tính năng khôi phục trong cài đặt tài khoản.'
-                    : 'Forgot PIN? Use recovery feature in account settings.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white54 : Colors.black38,
-                ),
-                textAlign: TextAlign.center,
+              TextButton(
+                onPressed: _isSendingRecovery ? null : _sendRecoveryEmail,
+                child: _isSendingRecovery
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        isVietnamese ? 'Quên PIN?' : 'Forgot PIN?',
+                        style: const TextStyle(
+                          color: Color(0xFF2ECC71),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
+              if (_recoveryMessage != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _recoveryMessage!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF2ECC71),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ],
           ),
         ),
