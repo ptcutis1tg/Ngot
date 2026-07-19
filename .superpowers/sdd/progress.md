@@ -8,3 +8,4 @@ This file tracks the progress of tasks under the Subagent-Driven Development wor
 | Task 3 | Complete | 0c13431 | Localized settings sections tiles and personal info form fields |
 | Task 4 | Complete | 6642d3a | Localized dashboard widgets, category tags, and group date formatting |
 | Task 5 | Complete | 1fd1f43 | Fully localized Statistics, Wallet, and Add Transaction screens in English, Vietnamese, and Korean |
+| Task 6 | Complete | 5814b50 | Fixed Red Screen of Death when toggling dark mode by making TextThemes perfectly symmetric |
