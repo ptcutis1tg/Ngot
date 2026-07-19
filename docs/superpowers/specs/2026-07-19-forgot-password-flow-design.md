@@ -34,4 +34,5 @@ Tại file `lib/firstscreen/onboarding_flow.dart`:
 - Trạng thái loading (`_isAuthLoading`) sẽ block các nút bấm chống click liên tục.
 
 ## 5. Dọn dẹp Code cũ
-- Tạm thời giữ lại file `update_password_screen.dart` làm phương án dự phòng (fallback) nếu user bấm vào deep link thay vì nhập mã OTP bằng tay.
+- Xóa bỏ hoàn toàn file `update_password_screen.dart` và các route liên quan trong `app_router.dart` do chúng ta không còn sử dụng Deep link nữa.
+- **Lưu ý cấu hình Supabase**: Cần truy cập vào giao diện quản trị (Dashboard) của Supabase -> Authentication -> Email Templates -> **Reset Password**, sau đó thay đổi nội dung mẫu email (Template) để chỉ hiển thị biến `{{ .Token }}` (mã OTP 6 số) thay vì URL khôi phục mật khẩu.

@@ -88,10 +88,14 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   // Auth states
   bool _isLoginView = true;
   bool _isForgotPasswordView = false;
+  bool _isVerifyOtpView = false;
   bool _isAuthLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -114,6 +118,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _otpController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -131,8 +138,11 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     try {
       if (_isForgotPasswordView) {
         await Supabase.instance.client.auth.resetPasswordForEmail(email);
-        _showMessage('Đã gửi email khôi phục mật khẩu');
-        setState(() => _isForgotPasswordView = false);
+        _showMessage('Đã gửi mã xác nhận qua email');
+        setState(() {
+          _isForgotPasswordView = false;
+          _isVerifyOtpView = true;
+        });
       } else if (_isLoginView) {
         if (password.isEmpty) {
           _showError('Vui lòng nhập mật khẩu');
@@ -157,6 +167,57 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         _showMessage('Đăng ký thành công! Vui lòng đăng nhập.');
         await _handlePostAuth();
       }
+    } on AuthException catch (e) {
+      _showError(e.message);
+    } catch (e) {
+      _showError('Đã xảy ra lỗi không xác định');
+    } finally {
+      if (mounted) setState(() => _isAuthLoading = false);
+    }
+  }
+
+  Future<void> _handleVerifyOtp() async {
+    final email = _emailController.text.trim();
+    final otp = _otpController.text.trim();
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (otp.isEmpty || otp.length != 6) {
+      _showError('Vui lòng nhập mã OTP 6 số');
+      return;
+    }
+    if (newPassword.isEmpty || newPassword.length < 6) {
+      _showError('Mật khẩu mới phải từ 6 ký tự trở lên');
+      return;
+    }
+    if (newPassword != confirmPassword) {
+      _showError('Nhập lại mật khẩu không khớp');
+      return;
+    }
+
+    setState(() => _isAuthLoading = true);
+    try {
+      await Supabase.instance.client.auth.verifyOTP(
+        email: email,
+        token: otp,
+        type: OtpType.recovery,
+      );
+      
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      
+      await Supabase.instance.client.auth.signOut();
+      
+      _showMessage('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+      setState(() {
+        _isVerifyOtpView = false;
+        _isLoginView = true;
+        _passwordController.clear();
+        _otpController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+      });
     } on AuthException catch (e) {
       _showError(e.message);
     } catch (e) {
@@ -388,6 +449,96 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     );
   }
 
+  Widget _buildVerifyOtpStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          const Text(
+            'Xác nhận mã OTP',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Nhập mã 6 số vừa được gửi đến ${_emailController.text}',
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 32),
+          TextField(
+            controller: _otpController,
+            keyboardType: TextInputType.number,
+            maxLength: 6,
+            decoration: const InputDecoration(
+              labelText: 'Mã xác nhận (OTP)',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.security),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _newPasswordController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Mật khẩu mới',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.lock),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _confirmPasswordController,
+            obscureText: true,
+            decoration: const InputDecoration(
+              labelText: 'Nhập lại mật khẩu mới',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.lock_outline),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _isAuthLoading ? null : _handleVerifyOtp,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2ECC71),
+                foregroundColor: Colors.white,
+              ),
+              child: _isAuthLoading
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Text('Xác nhận đổi mật khẩu'),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                setState(() {
+                  _isVerifyOtpView = false;
+                  _isForgotPasswordView = true;
+                });
+              },
+              child: const Text('Quay lại'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthStepContainer() {
+    if (_isVerifyOtpView) {
+      return _buildVerifyOtpStep();
+    }
+    return _buildAuthStep();
+  }
+
   Widget _buildReviewStep() {
     final features = [
       ('Ghi giao dịch nhanh', 'Thêm thu chi trong vài giây với nút +'),
@@ -452,7 +603,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           child: switch (_step) {
             0 => _buildLanguageStep(),
             1 => _buildGettingStartedStep(),
-            2 => _buildAuthStep(),
+            2 => _buildAuthStepContainer(),
             _ => _buildReviewStep(),
           },
         ),
