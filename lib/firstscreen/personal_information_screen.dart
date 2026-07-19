@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firstscreen/widget/settings/avatar_display_options_sheet.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:flutter_application_1/providers/pin_provider.dart';
+import 'package:flutter_application_1/firstscreen/pin_settings_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -377,6 +379,79 @@ class _PersonalInformationScreenBodyState
                         ),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // PIN Code Section
+                Text(
+                  (isVietnamese ? 'MÃ PIN BẢO MẬT' : 'SECURITY PIN').toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: labelColor,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PinSettingsScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: cardBgColor,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: borderColor, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.lock_outline,
+                          color: Color(0xFF2ECC71),
+                          size: 28,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isVietnamese ? 'Mã PIN đồng bộ' : 'Synced PIN Code',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: textOnCardColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.watch<PinProvider>().hasPin
+                                    ? (isVietnamese ? 'Đã thiết lập' : 'Configured')
+                                    : (isVietnamese ? 'Chưa thiết lập' : 'Not configured'),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.watch<PinProvider>().hasPin
+                                      ? const Color(0xFF2ECC71)
+                                      : labelColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: labelColor,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 28),
