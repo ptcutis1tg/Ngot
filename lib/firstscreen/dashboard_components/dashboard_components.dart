@@ -415,9 +415,7 @@ class RecentList extends StatelessWidget {
           );
         }
 
-        final txs = [...txProvider.transactions]
-          ..sort((a, b) => b.time.compareTo(a.time));
-        final groups = groupByDay(context, txs.take(8).toList());
+        final groups = groupByDay(context, txProvider.transactions.take(8).toList());
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

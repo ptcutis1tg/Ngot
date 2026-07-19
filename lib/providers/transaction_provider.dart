@@ -1,17 +1,64 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:sembast/sembast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import '../models/transactionproflie.dart';
+import 'db_factory.dart';
+
+class _SembastEncryptCodec extends Codec<Object?, String> {
+  final encrypt.Encrypter _encrypter;
+  final encrypt.IV _iv;
+
+  _SembastEncryptCodec(String base64Key)
+      : _encrypter = encrypt.Encrypter(encrypt.AES(encrypt.Key.fromBase64(base64Key))),
+        _iv = encrypt.IV.fromLength(16);
+
+  @override
+  Converter<String, Object?> get decoder => _SembastDecryptEncoder(_encrypter, _iv);
+
+  @override
+  Converter<Object?, String> get encoder => _SembastEncryptEncoder(_encrypter, _iv);
+}
+
+class _SembastEncryptEncoder extends Converter<Object?, String> {
+  final encrypt.Encrypter _encrypter;
+  final encrypt.IV _iv;
+
+  _SembastEncryptEncoder(this._encrypter, this._iv);
+
+  @override
+  String convert(Object? input) {
+    final jsonStr = json.encode(input);
+    final encrypted = _encrypter.encrypt(jsonStr, iv: _iv);
+    return encrypted.base64;
+  }
+}
+
+class _SembastDecryptEncoder extends Converter<String, Object?> {
+  final encrypt.Encrypter _encrypter;
+  final encrypt.IV _iv;
+
+  _SembastDecryptEncoder(this._encrypter, this._iv);
+
+  @override
+  Object? convert(String input) {
+    final decrypted = _encrypter.decrypt64(input, iv: _iv);
+    return json.decode(decrypted);
+  }
+}
 
 class TransactionProvider extends ChangeNotifier {
-  static const String _transactionsKey = 'transactions_v1';
-
-  final Future<SharedPreferences> _prefsFuture =
-      SharedPreferences.getInstance();
+  static const String _storeName = 'transactions_store';
+  static const String _dbName = 'transactions.db';
+  
+  final _secureStorage = const FlutterSecureStorage();
+  late Database _db;
+  
   final List<TransactionProfile> _transactions = [];
-
   bool _loaded = false;
   double _totalBalance = 0;
 
@@ -22,26 +69,53 @@ class TransactionProvider extends ChangeNotifier {
   Future<void> loadTransactions() async {
     if (_loaded) return;
 
-    final prefs = await _prefsFuture;
-    final raw = prefs.getString(_transactionsKey);
-
-    _transactions.clear();
-    if (raw != null && raw.isNotEmpty) {
-      final decoded = jsonDecode(raw) as List<dynamic>;
-      _transactions.addAll(decoded.map((e) => TransactionProfile.fromJson(e)));
-      _transactions.sort((a, b) => b.time.compareTo(a.time));
+    // 1. Get or Generate Encryption Key from Secure Storage
+    String? keyStr = await _secureStorage.read(key: 'db_encryption_key');
+    if (keyStr == null) {
+      final key = encrypt.Key.fromSecureRandom(32);
+      keyStr = key.base64;
+      await _secureStorage.write(key: 'db_encryption_key', value: keyStr);
     }
-
-    _totalBalance =
-        _transactions.fold<double>(0, (sum, item) => sum + item.amount);
+    
+    // 2. Initialize Sembast with Codec
+    final codec = SembastCodec(
+      signature: 'encrypt_v1',
+      codec: _SembastEncryptCodec(keyStr),
+    );
+    
+    String dbPath = _dbName;
+    if (!kIsWeb) {
+      final dir = await getApplicationDocumentsDirectory();
+      dbPath = join(dir.path, _dbName);
+    }
+    
+    final factory = getDatabaseFactory();
+    _db = await factory.openDatabase(dbPath, codec: codec);
+    
+    // 3. Load existing records
+    final store = intMapStoreFactory.store(_storeName);
+    final records = await store.find(_db);
+    
+    _transactions.clear();
+    for (var record in records) {
+      _transactions.add(TransactionProfile.fromJson(record.value));
+    }
+    
+    _transactions.sort((a, b) => b.time.compareTo(a.time));
+    _totalBalance = _transactions.fold<double>(0, (sum, item) => sum + item.amount);
+    
     _loaded = true;
     notifyListeners();
   }
 
   Future<void> addTransaction(TransactionProfile transaction) async {
-    _transactions.insert(0, transaction);
+    _transactions.add(transaction);
+    _transactions.sort((a, b) => b.time.compareTo(a.time));
     _totalBalance += transaction.amount;
-    await _persist();
+    
+    final store = intMapStoreFactory.store(_storeName);
+    await store.add(_db, transaction.toJson());
+    
     notifyListeners();
   }
 
@@ -50,13 +124,10 @@ class TransactionProvider extends ChangeNotifier {
 
     _transactions.clear();
     _totalBalance = 0;
-    await _persist();
+    
+    final store = intMapStoreFactory.store(_storeName);
+    await store.delete(_db);
+    
     notifyListeners();
-  }
-
-  Future<void> _persist() async {
-    final prefs = await _prefsFuture;
-    final data = _transactions.map((e) => e.toJson()).toList();
-    await prefs.setString(_transactionsKey, jsonEncode(data));
   }
 }
