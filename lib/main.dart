@@ -29,6 +29,9 @@ const bool resetOnboardingFlowOnly = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  PaintingBinding.instance.imageCache.maximumSize = 20;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 20 << 20;
+
   try {
     await dotenv.load(fileName: ".env");
     SupabaseConfig.validate();
