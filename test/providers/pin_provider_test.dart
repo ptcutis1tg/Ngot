@@ -10,6 +10,7 @@ class FakePinAuthClient implements PinAuthClient {
   String? email;
   Map<String, dynamic>? lastUpdate;
   String? recoveryEmail;
+  String? recoveryOtp;
 
   @override
   Map<String, dynamic>? get userMetadata => metadata;
@@ -20,7 +21,10 @@ class FakePinAuthClient implements PinAuthClient {
   }
 
   @override
-  Future<void> sendRecoveryEmail(String value) async => recoveryEmail = value;
+  Future<void> sendRecoveryEmail(String emailValue, String otp) async {
+    recoveryEmail = emailValue;
+    recoveryOtp = otp;
+  }
 }
 
 void main() {

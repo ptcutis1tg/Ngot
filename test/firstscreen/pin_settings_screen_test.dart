@@ -24,7 +24,8 @@ class FakePinAuthClient implements PinAuthClient {
   }
 
   @override
-  Future<void> sendRecoveryEmail(String value) async => recoveryEmail = value;
+  Future<void> sendRecoveryEmail(String emailValue, String otp) async =>
+      recoveryEmail = emailValue;
 }
 
 void main() {

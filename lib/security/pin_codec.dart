@@ -19,6 +19,12 @@ class PinCodec {
     return pinVal.toString().padLeft(6, '0');
   }
 
+  String generateOtp() {
+    final random = Random.secure();
+    final otpVal = random.nextInt(1000000);
+    return otpVal.toString().padLeft(6, '0');
+  }
+
   Map<String, dynamic> createRecord(String pin) {
     if (!isValidPin(pin)) {
       throw ArgumentError('Mã PIN phải gồm đúng 6 chữ số.');

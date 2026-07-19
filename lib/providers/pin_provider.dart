@@ -6,7 +6,7 @@ abstract class PinAuthClient {
   Map<String, dynamic>? get userMetadata;
   String? get email;
   Future<void> updateMetadata(Map<String, dynamic> value);
-  Future<void> sendRecoveryEmail(String email);
+  Future<void> sendRecoveryEmail(String email, String otp);
 }
 
 class SupabasePinAuthClient implements PinAuthClient {
@@ -25,8 +25,12 @@ class SupabasePinAuthClient implements PinAuthClient {
   }
 
   @override
-  Future<void> sendRecoveryEmail(String email) async {
-    await Supabase.instance.client.auth.resetPasswordForEmail(email);
+  Future<void> sendRecoveryEmail(String email, String otp) async {
+    // Send email with OTP code
+    await Supabase.instance.client.functions.invoke(
+      'send-otp-email',
+      body: {'email': email, 'otp': otp},
+    );
   }
 }
 
@@ -36,9 +40,16 @@ class PinProvider extends ChangeNotifier {
 
   bool _hasPin = false;
   String _suggestedPin = '';
+  String? _currentOtp;
+  DateTime? _otpSentAt;
 
   bool get hasPin => _hasPin;
   String get suggestedPin => _suggestedPin;
+  bool get hasOtp => _currentOtp != null && _otpSentAt != null;
+  bool get otpExpired {
+    if (_otpSentAt == null) return true;
+    return DateTime.now().difference(_otpSentAt!) > const Duration(minutes: 10);
+  }
 
   PinProvider(this.auth, {PinCodec? codec}) : codec = codec ?? PinCodec() {
     _suggestedPin = this.codec.suggestPin();
@@ -125,10 +136,49 @@ class PinProvider extends ChangeNotifier {
       return 'Không tìm thấy email tài khoản';
     }
     try {
-      await auth.sendRecoveryEmail(email);
+      final otp = codec.generateOtp();
+      await auth.sendRecoveryEmail(email, otp);
+      _currentOtp = otp;
+      _otpSentAt = DateTime.now();
+      notifyListeners();
       return null;
     } catch (e) {
       return 'Lỗi gửi email: ${e.toString()}';
     }
+  }
+
+  bool verifyOtp(String otp) {
+    if (_currentOtp == null || otpExpired) return false;
+    return _currentOtp == otp;
+  }
+
+  Future<String?> resetPinWithOtp(String otp, String newPin) async {
+    if (!verifyOtp(otp)) {
+      return 'Mã OTP không đúng hoặc đã hết hạn';
+    }
+    if (!codec.isValidPin(newPin)) {
+      return 'Mã PIN phải gồm đúng 6 chữ số';
+    }
+
+    try {
+      final newRecord = codec.createRecord(newPin);
+      final metadata = auth.userMetadata ?? {};
+      final newMetadata = Map<String, dynamic>.from(metadata);
+      newMetadata['pin'] = newRecord;
+
+      await auth.updateMetadata(newMetadata);
+      _currentOtp = null;
+      _otpSentAt = null;
+      await refresh();
+      return null;
+    } catch (e) {
+      return 'Lỗi đặt lại PIN: ${e.toString()}';
+    }
+  }
+
+  void clearOtp() {
+    _currentOtp = null;
+    _otpSentAt = null;
+    notifyListeners();
   }
 }
