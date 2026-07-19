@@ -13,6 +13,7 @@ import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
 import 'package:flutter_application_1/providers/userprofileprovider.dart';
+import 'package:flutter_application_1/providers/pin_provider.dart';
 import 'package:flutter_application_1/reset.dart';
 import 'package:flutter_application_1/supabase_config.dart';
 import 'package:flutter_application_1/router/app_router.dart';
@@ -74,6 +75,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => BackupProvider()),
         ChangeNotifierProvider(create: (_) => appSettingsProvider),
         ChangeNotifierProvider(create: (_) => CurrencyProvider()),
+        ChangeNotifierProvider(
+          create: (_) => PinProvider(SupabasePinAuthClient())..refresh(),
+        ),
       ],
       child: const DailyExpenseApp(),
     ),
