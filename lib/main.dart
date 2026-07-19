@@ -9,6 +9,7 @@ import 'package:flutter_application_1/firstscreen/wallet_screen.dart';
 import 'package:flutter_application_1/firstscreen/widget/addtransaction.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
 import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:flutter_application_1/providers/backup_provider.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
@@ -114,6 +115,7 @@ class DailyExpenseApp extends StatelessWidget {
       supportedLocales: const [
         Locale('vi'),
         Locale('en'),
+        Locale('ko'),
       ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -251,8 +253,8 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
 
   @override
   Widget build(BuildContext context) {
-    final isVietnamese =
-        context.watch<AppSettingsProvider>().languageCode == 'vi';
+    final languageCode =
+        context.watch<AppSettingsProvider>().languageCode;
 
     return Scaffold(
       extendBody: true,
@@ -294,19 +296,19 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.home_rounded),
-              label: isVietnamese ? 'TRANG CHU' : 'HOME',
+              label: AppTranslations.getText(languageCode, 'nav_home'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.bar_chart_rounded),
-              label: isVietnamese ? 'BAO CAO' : 'REPORT',
+              label: AppTranslations.getText(languageCode, 'nav_report'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.account_balance_wallet_rounded),
-              label: isVietnamese ? 'NGAN QUY' : 'WALLET',
+              label: AppTranslations.getText(languageCode, 'nav_wallet'),
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.settings_rounded),
-              label: isVietnamese ? 'CAI DAT' : 'SETTINGS',
+              label: AppTranslations.getText(languageCode, 'nav_settings'),
             ),
           ],
         ),

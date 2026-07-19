@@ -79,7 +79,7 @@ class AppSettingsProvider extends ChangeNotifier {
 
   Future<void> setLanguageCode(String value) async {
     final next = value.trim().toLowerCase();
-    if (next != 'vi' && next != 'en') return;
+    if (next != 'vi' && next != 'en' && next != 'ko') return;
     if (_languageCode == next) return;
 
     _languageCode = next;
