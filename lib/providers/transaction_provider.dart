@@ -102,7 +102,10 @@ class TransactionProvider extends ChangeNotifier {
     
     _transactions.clear();
     for (var record in records) {
-      _transactions.add(TransactionProfile.fromJson(record.value));
+      final t = TransactionProfile.fromJson(record.value);
+      if (!t.isDeleted) {
+        _transactions.add(t);
+      }
     }
     
     _transactions.sort((a, b) => b.time.compareTo(a.time));
@@ -130,7 +133,20 @@ class TransactionProvider extends ChangeNotifier {
     _totalBalance = 0;
     
     final store = intMapStoreFactory.store(_storeName);
-    await store.delete(_db);
+    final records = await store.find(_db);
+    for (var record in records) {
+      final t = TransactionProfile.fromJson(record.value);
+      final updated = TransactionProfile(
+        id: t.id,
+        title: t.title,
+        time: t.time,
+        amount: t.amount,
+        updatedAt: DateTime.now(),
+        isDeleted: true,
+        userId: t.userId,
+      );
+      await store.record(record.key).put(_db, updated.toJson());
+    }
     
     notifyListeners();
   }
