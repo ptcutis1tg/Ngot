@@ -164,69 +164,38 @@ class ProfileHeader extends StatelessWidget {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, _) {
         final theme = Theme.of(context);
-        return InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const PersonalInformationScreen(),
+        return Container(
+          padding: const EdgeInsets.all(20),
+          color: layerColor(context, 1),
+          child: Row(
+            children: [
+              CircleAvatar(
+                key: ValueKey<String>(userProfile.userAvatar),
+                radius: 35,
+                backgroundImage: avatarProvider(userProfile.userAvatar),
               ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            color: layerColor(context, 1),
-            child: Row(
-              children: [
-                Stack(
-                  clipBehavior: Clip.none,
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      key: ValueKey<String>(userProfile.userAvatar),
-                      radius: 35,
-                      backgroundImage: avatarProvider(userProfile.userAvatar),
+                    Text(
+                      userProfile.userName.isNotEmpty
+                          ? userProfile.userName
+                          : 'Guest',
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2ECC71),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                      ),
+                    Text(
+                      userProfile.userEmail.isNotEmpty
+                          ? userProfile.userEmail
+                          : 'No email',
+                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userProfile.userName.isNotEmpty
-                            ? userProfile.userName
-                            : 'Guest',
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        userProfile.userEmail.isNotEmpty
-                            ? userProfile.userEmail
-                            : 'No email',
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
