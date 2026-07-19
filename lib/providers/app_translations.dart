@@ -98,9 +98,39 @@ class AppTranslations {
       'ob_review_f2_desc': 'Theo dõi xu hướng chi tiêu theo thời gian',
       'ob_review_f3_title': 'Quản lý ví tiền',
       'ob_review_f3_desc': 'Tổ chức tài khoản và xem tổng số dư',
-      'ob_enter_app': 'Vào ứng dụng',
+       'ob_enter_app': 'Vào ứng dụng',
       'ob_continue': 'Continue',
       'ob_loading': 'Loading...',
+
+      // Statistics / Report Screen
+      'stat_title': 'Statistics',
+      'stat_weekly': 'Weekly',
+      'stat_monthly': 'Monthly',
+      'stat_yearly': 'Yearly',
+      'stat_top_spending': 'Top Spending',
+      'stat_no_spending': 'No spending in selected range',
+
+      // Wallets Screen
+      'wal_title': 'My Wallet',
+      'wal_overview': 'Wallet Overview',
+      'wal_summary': 'Wallet Summary',
+      'wal_total_income': 'Total Income',
+      'wal_total_expense': 'Total Expense',
+      'wal_this_month_expense': 'This Month Expense',
+      'wal_total_transactions': 'Total Transactions',
+      'wal_main_balance': 'Main Balance',
+      'wal_monthly_net': 'Monthly Net',
+
+      // Add Transaction Dialog / Plus Button Screen
+      'add_tx_expense': 'Expense',
+      'add_tx_income': 'Income',
+      'add_tx_add_note': 'Add note',
+      'add_tx_type_note': 'Type your note',
+      'add_tx_add_note_placeholder': 'Add note...',
+      'add_tx_select_category': 'SELECT CATEGORY TO SAVE',
+      'add_tx_save': 'Save Transaction',
+      'cat_shop': 'Shop',
+      'cat_bills': 'Bills',
     },
     'vi': {
       // Bottom Navigation
@@ -203,6 +233,36 @@ class AppTranslations {
       'ob_enter_app': 'Vào ứng dụng',
       'ob_continue': 'Tiếp tục',
       'ob_loading': 'Đang tải...',
+
+      // Statistics / Report Screen
+      'stat_title': 'Thống kê',
+      'stat_weekly': 'Hàng tuần',
+      'stat_monthly': 'Hàng tháng',
+      'stat_yearly': 'Hàng năm',
+      'stat_top_spending': 'Chi tiêu nhiều nhất',
+      'stat_no_spending': 'Không có chi tiêu trong khoảng thời gian đã chọn',
+
+      // Wallets Screen
+      'wal_title': 'Ngân quỹ',
+      'wal_overview': 'Tổng quan',
+      'wal_summary': 'Tóm tắt ngân quỹ',
+      'wal_total_income': 'Tổng thu nhập',
+      'wal_total_expense': 'Tổng chi tiêu',
+      'wal_this_month_expense': 'Chi tiêu tháng này',
+      'wal_total_transactions': 'Tổng số giao dịch',
+      'wal_main_balance': 'Số dư chính',
+      'wal_monthly_net': 'Tích lũy tháng',
+
+      // Add Transaction Dialog / Plus Button Screen
+      'add_tx_expense': 'Khoản chi',
+      'add_tx_income': 'Khoản thu',
+      'add_tx_add_note': 'Thêm ghi chú',
+      'add_tx_type_note': 'Nhập ghi chú của bạn',
+      'add_tx_add_note_placeholder': 'Thêm ghi chú...',
+      'add_tx_select_category': 'CHỌN DANH MỤC ĐỂ LƯU',
+      'add_tx_save': 'Lưu giao dịch',
+      'cat_shop': 'Mua sắm',
+      'cat_bills': 'Hóa đơn',
     },
     'ko': {
       // Bottom Navigation
@@ -305,6 +365,36 @@ class AppTranslations {
       'ob_enter_app': '앱 시작하기',
       'ob_continue': '계속하기',
       'ob_loading': '로딩 중...',
+
+      // Statistics / Report Screen
+      'stat_title': '통계',
+      'stat_weekly': '주간',
+      'stat_monthly': '월간',
+      'stat_yearly': '연간',
+      'stat_top_spending': '최다 지출',
+      'stat_no_spending': '선택한 기간 동안 지출이 없습니다',
+
+      // Wallets Screen
+      'wal_title': '지갑',
+      'wal_overview': '개요',
+      'wal_summary': '지갑 요약',
+      'wal_total_income': '총 수입',
+      'wal_total_expense': '총 지출',
+      'wal_this_month_expense': '이번 달 지출',
+      'wal_total_transactions': '총 거래 수',
+      'wal_main_balance': '주요 잔액',
+      'wal_monthly_net': '월간 순수입',
+
+      // Add Transaction Dialog / Plus Button Screen
+      'add_tx_expense': '지출',
+      'add_tx_income': '수입',
+      'add_tx_add_note': '메모 추가',
+      'add_tx_type_note': '메모를 입력하세요',
+      'add_tx_add_note_placeholder': '메모 추가...',
+      'add_tx_select_category': '저장할 카테고리 선택',
+      'add_tx_save': '거래 저장',
+      'cat_shop': '쇼핑',
+      'cat_bills': '청구서',
     }
   };
 

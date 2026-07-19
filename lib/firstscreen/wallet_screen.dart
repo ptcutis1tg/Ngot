@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
+import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:provider/provider.dart';
 
 class WalletScreen extends StatelessWidget {
@@ -20,7 +22,8 @@ class _WalletAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(title: const Text('My Wallet'));
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+    return AppBar(title: Text(AppTranslations.getText(languageCode, 'wal_title')));
   }
 
   @override
@@ -34,6 +37,7 @@ class _WalletBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final txProvider = context.watch<TransactionProvider>();
     final format = context.watch<CurrencyProvider>().numberFormat;
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
 
     if (!txProvider.isLoaded) {
       return const Center(child: CircularProgressIndicator());
@@ -67,9 +71,9 @@ class _WalletBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Wallet Overview',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            AppTranslations.getText(languageCode, 'wal_overview'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 15),
           _CardPager(
@@ -80,29 +84,29 @@ class _WalletBody extends StatelessWidget {
             monthIncomeText: format.format(monthIncome),
           ),
           const SizedBox(height: 30),
-          const Text(
-            'Wallet Summary',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            AppTranslations.getText(languageCode, 'wal_summary'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 15),
           _AccountItem(
             icon: Icons.arrow_upward,
-            title: 'Total Income',
+            title: AppTranslations.getText(languageCode, 'wal_total_income'),
             amount: format.format(income),
           ),
           _AccountItem(
             icon: Icons.arrow_downward,
-            title: 'Total Expense',
+            title: AppTranslations.getText(languageCode, 'wal_total_expense'),
             amount: format.format(expense),
           ),
           _AccountItem(
             icon: Icons.calendar_month,
-            title: 'This Month Expense',
+            title: AppTranslations.getText(languageCode, 'wal_this_month_expense'),
             amount: format.format(monthExpense),
           ),
           _AccountItem(
             icon: Icons.receipt_long,
-            title: 'Total Transactions',
+            title: AppTranslations.getText(languageCode, 'wal_total_transactions'),
             amount: '${txProvider.transactions.length}',
           ),
         ],
@@ -145,21 +149,33 @@ class _CardPagerState extends State<_CardPager> {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+    final String sub1 = switch (languageCode) {
+      'vi' => '${widget.transactionCount} giao dịch',
+      'ko' => '${widget.transactionCount}건의 거래',
+      _ => '${widget.transactionCount} transactions',
+    };
+    final String sub2 = switch (languageCode) {
+      'vi' => 'Thu nhập tháng này ${widget.monthIncomeText}',
+      'ko' => '이번 달 수입 ${widget.monthIncomeText}',
+      _ => 'This month income ${widget.monthIncomeText}',
+    };
+
     return SizedBox(
       height: 200,
       child: PageView(
         controller: _pageController,
         children: [
           _WalletCard(
-            label: 'Main Balance',
+            label: AppTranslations.getText(languageCode, 'wal_main_balance'),
             amount: widget.balanceText,
-            subtitle: '${widget.transactionCount} transactions',
+            subtitle: sub1,
             color: const Color(0xFF2ECC71),
           ),
           _WalletCard(
-            label: 'Monthly Net',
+            label: AppTranslations.getText(languageCode, 'wal_monthly_net'),
             amount: widget.monthlyNetText,
-            subtitle: 'This month income ${widget.monthIncomeText}',
+            subtitle: sub2,
             color: const Color(0xFF2C3E50),
           ),
         ],

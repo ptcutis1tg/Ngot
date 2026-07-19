@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
 import 'package:flutter_application_1/providers/transaction_provider.dart';
+import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +29,8 @@ class _StatisticsAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(title: const Text('Statistics'));
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
+    return AppBar(title: Text(AppTranslations.getText(languageCode, 'stat_title')));
   }
 
   @override
@@ -48,8 +51,9 @@ class _StatisticsBodyState extends State<_StatisticsBody> {
   Widget build(BuildContext context) {
     final txProvider = context.watch<TransactionProvider>();
     final currency = context.watch<CurrencyProvider>().numberFormat;
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
     final now = DateTime.now();
-    final buckets = _buildBuckets(txProvider.transactions, now);
+    final buckets = _buildBuckets(txProvider.transactions, now, languageCode);
     final categories = _buildTopCategories(txProvider.transactions, now);
     final totalExpense = categories.fold<double>(0, (sum, item) => sum + item.amount);
 
@@ -75,7 +79,7 @@ class _StatisticsBodyState extends State<_StatisticsBody> {
     );
   }
 
-  List<_BucketData> _buildBuckets(List<TransactionProfile> transactions, DateTime now) {
+  List<_BucketData> _buildBuckets(List<TransactionProfile> transactions, DateTime now, String languageCode) {
     switch (_selectedFilter) {
       case _TimeFilter.weekly:
         final today = DateTime(now.year, now.month, now.day);
@@ -83,7 +87,7 @@ class _StatisticsBodyState extends State<_StatisticsBody> {
         final list = List<_BucketData>.generate(
           7,
           (i) => _BucketData(
-            label: DateFormat('E').format(start.add(Duration(days: i))),
+            label: DateFormat('E', languageCode).format(start.add(Duration(days: i))),
             total: 0,
           ),
         );
@@ -110,7 +114,7 @@ class _StatisticsBodyState extends State<_StatisticsBody> {
         final list = List<_BucketData>.generate(
           12,
           (i) => _BucketData(
-            label: DateFormat('MMM').format(DateTime(now.year, i + 1, 1)),
+            label: DateFormat('MMM', languageCode).format(DateTime(now.year, i + 1, 1)),
             total: 0,
           ),
         );
@@ -167,11 +171,12 @@ class _FilterBar extends StatefulWidget {
 class _FilterBarState extends State<_FilterBar> {
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
     return Row(
       children: [
         Expanded(
           child: _FilterChip(
-            title: 'Weekly',
+            title: AppTranslations.getText(languageCode, 'stat_weekly'),
             selected: widget.selected == _TimeFilter.weekly,
             onTap: () => widget.onChanged(_TimeFilter.weekly),
           ),
@@ -179,7 +184,7 @@ class _FilterBarState extends State<_FilterBar> {
         const SizedBox(width: 8),
         Expanded(
           child: _FilterChip(
-            title: 'Monthly',
+            title: AppTranslations.getText(languageCode, 'stat_monthly'),
             selected: widget.selected == _TimeFilter.monthly,
             onTap: () => widget.onChanged(_TimeFilter.monthly),
           ),
@@ -187,7 +192,7 @@ class _FilterBarState extends State<_FilterBar> {
         const SizedBox(width: 8),
         Expanded(
           child: _FilterChip(
-            title: 'Yearly',
+            title: AppTranslations.getText(languageCode, 'stat_yearly'),
             selected: widget.selected == _TimeFilter.yearly,
             onTap: () => widget.onChanged(_TimeFilter.yearly),
           ),
@@ -359,12 +364,13 @@ class _TopSpendingSectionState extends State<_TopSpendingSection> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final languageCode = context.watch<AppSettingsProvider>().languageCode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Top Spending',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          AppTranslations.getText(languageCode, 'stat_top_spending'),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 15),
         if (widget.categories.isEmpty)
@@ -375,13 +381,21 @@ class _TopSpendingSectionState extends State<_TopSpendingSection> {
               color: isDark ? Theme.of(context).cardColor : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Text('No spending in selected range'),
+            child: Text(AppTranslations.getText(languageCode, 'stat_no_spending')),
           ),
         ...widget.categories.take(5).map((item) {
           final percent =
               widget.totalExpense == 0 ? 0.0 : (item.amount / widget.totalExpense);
+          final displayTitle = switch (item.title) {
+            'Food' => AppTranslations.getText(languageCode, 'cat_food'),
+            'Travel' => AppTranslations.getText(languageCode, 'cat_transport'),
+            'Shop' => AppTranslations.getText(languageCode, 'cat_shop'),
+            'Bills' => AppTranslations.getText(languageCode, 'cat_bills'),
+            'Other' => AppTranslations.getText(languageCode, 'cat_other'),
+            _ => item.title,
+          };
           return _CategoryTile(
-            title: item.title,
+            title: displayTitle,
             amount: widget.formatAmount(item.amount),
             percent: percent,
             color: _colorForName(item.title),

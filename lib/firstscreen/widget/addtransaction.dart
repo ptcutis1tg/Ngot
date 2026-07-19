@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/transactionproflie.dart';
 import 'package:flutter_application_1/providers/currency_provider.dart';
+import 'package:flutter_application_1/providers/app_settings_provider.dart';
+import 'package:flutter_application_1/providers/app_translations.dart';
 import 'package:provider/provider.dart';
 
 class AddTransactionWidget extends StatefulWidget {
@@ -169,6 +171,8 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
   Widget build(BuildContext context) {
     final currency = context.watch<CurrencyProvider>().selected.symbol;
     final value = _evaluate().abs().toStringAsFixed(2);
+    final appSettings = context.watch<AppSettingsProvider>();
+    final languageCode = appSettings.languageCode;
 
     return Material(
       color: const Color(0xFF041F14),
@@ -204,14 +208,14 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                           children: [
                             Expanded(
                               child: _TypeTab(
-                                label: 'Expense',
+                                label: AppTranslations.getText(languageCode, 'add_tx_expense'),
                                 selected: _isExpense,
                                 onTap: () => setState(() => _isExpense = true),
                               ),
                             ),
                             Expanded(
                               child: _TypeTab(
-                                label: 'Income',
+                                label: AppTranslations.getText(languageCode, 'add_tx_income'),
                                 selected: !_isExpense,
                                 onTap: () => setState(() => _isExpense = false),
                               ),
@@ -247,26 +251,26 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       backgroundColor: const Color(0xFF0C3A24),
-                      title: const Text(
-                        'Add note',
-                        style: TextStyle(color: Color(0xFFE9F5EE)),
+                      title: Text(
+                        AppTranslations.getText(languageCode, 'add_tx_add_note'),
+                        style: const TextStyle(color: Color(0xFFE9F5EE)),
                       ),
                       content: TextField(
                         controller: controller,
                         style: const TextStyle(color: Color(0xFFE9F5EE)),
-                        decoration: const InputDecoration(
-                          hintText: 'Type your note',
-                          hintStyle: TextStyle(color: Color(0xFF6E8D7E)),
+                        decoration: InputDecoration(
+                          hintText: AppTranslations.getText(languageCode, 'add_tx_type_note'),
+                          hintStyle: const TextStyle(color: Color(0xFF6E8D7E)),
                         ),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancel'),
+                          child: Text(AppTranslations.getText(languageCode, 'st_cancel')),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, controller.text),
-                          child: const Text('Save'),
+                          child: Text(AppTranslations.getText(languageCode, 'pi_save_tooltip')),
                         ),
                       ],
                     ),
@@ -276,7 +280,7 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                   }
                 },
                 child: Text(
-                  _note.trim().isEmpty ? 'Add note...' : _note,
+                  _note.trim().isEmpty ? AppTranslations.getText(languageCode, 'add_tx_add_note_placeholder') : _note,
                   style: const TextStyle(
                     color: Color(0xFF17CB72),
                     fontSize: 22,
@@ -300,11 +304,11 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                       onBackspace: _backspace,
                     ),
                     const SizedBox(height: 16),
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'SELECT CATEGORY TO SAVE',
-                        style: TextStyle(
+                        AppTranslations.getText(languageCode, 'add_tx_select_category'),
+                        style: const TextStyle(
                           color: Color(0xFF97A8A0),
                           fontSize: 16,
                           letterSpacing: 1.3,
@@ -320,6 +324,13 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                         itemBuilder: (context, index) {
                           final item = _categories[index];
                           final selected = _category == item.label;
+                          final displayLabel = switch (item.label) {
+                            'Food' => AppTranslations.getText(languageCode, 'cat_food'),
+                            'Travel' => AppTranslations.getText(languageCode, 'cat_transport'),
+                            'Shop' => AppTranslations.getText(languageCode, 'cat_shop'),
+                            'Bills' => AppTranslations.getText(languageCode, 'cat_bills'),
+                            _ => item.label,
+                          };
                           return GestureDetector(
                             onTap: () => setState(() => _category = item.label),
                             child: Container(
@@ -341,7 +352,7 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                                   Icon(item.icon, size: 38, color: item.iconColor),
                                   const SizedBox(height: 8),
                                   Text(
-                                    item.label,
+                                    displayLabel,
                                     style: const TextStyle(
                                       color: Color(0xFFD6E6DE),
                                       fontSize: 18,
@@ -370,9 +381,9 @@ class _AddTransactionWidgetState extends State<AddTransactionWidget> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: const Text(
-                          'Save Transaction',
-                          style: TextStyle(
+                        child: Text(
+                          AppTranslations.getText(languageCode, 'add_tx_save'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
