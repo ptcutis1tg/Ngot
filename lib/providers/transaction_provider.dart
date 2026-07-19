@@ -150,4 +150,39 @@ class TransactionProvider extends ChangeNotifier {
     
     notifyListeners();
   }
+
+  Future<void> upsertTransactionFromSync(TransactionProfile transaction) async {
+    final index = _transactions.indexWhere((t) => t.id == transaction.id);
+    if (index != -1) {
+      if (!_transactions[index].isDeleted) {
+         _totalBalance -= _transactions[index].amount;
+      }
+      _transactions[index] = transaction;
+    } else {
+      _transactions.add(transaction);
+    }
+    
+    if (!transaction.isDeleted) {
+       _totalBalance += transaction.amount;
+    }
+    _transactions.sort((a, b) => b.time.compareTo(a.time));
+    
+    final store = intMapStoreFactory.store(_storeName);
+    final finder = Finder(filter: Filter.equals('id', transaction.id));
+    final records = await store.find(_db, finder: finder);
+    
+    if (records.isNotEmpty) {
+      await store.record(records.first.key).put(_db, transaction.toJson());
+    } else {
+      await store.add(_db, transaction.toJson());
+    }
+    
+    notifyListeners();
+  }
+
+  Future<List<TransactionProfile>> getAllRawTransactions() async {
+    final store = intMapStoreFactory.store(_storeName);
+    final records = await store.find(_db);
+    return records.map((r) => TransactionProfile.fromJson(r.value)).toList();
+  }
 }
