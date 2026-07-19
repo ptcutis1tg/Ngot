@@ -268,7 +268,11 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProfileProvider>().loadProfile();
       context.read<TransactionProvider>().loadTransactions().then((_) {
-        SyncService().syncTransactions(context.read<TransactionProvider>());
+        SyncService().syncAll(
+          context.read<TransactionProvider>(),
+          context.read<AppSettingsProvider>(),
+          context.read<UserProfileProvider>(),
+        );
       });
       context.read<BackupProvider>().loadConfig();
       context.read<CurrencyProvider>().loadCurrency();
