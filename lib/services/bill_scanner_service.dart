@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/transactionproflie.dart';
 
 class BillScannerService {
-  static Future<TransactionProfile?> scanBill(File imageFile) async {
+  static Future<TransactionProfile?> scanBill(XFile imageFile) async {
     final geminiKey = dotenv.env['GEMINI_API_KEY'];
     final endpoint = dotenv.env['AI_API_ENDPOINT'];
     

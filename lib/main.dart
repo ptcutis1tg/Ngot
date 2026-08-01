@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -333,8 +332,7 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
     );
 
     try {
-      final file = File(pickedFile.path);
-      final tx = await BillScannerService.scanBill(file);
+      final tx = await BillScannerService.scanBill(pickedFile);
       
       if (!mounted) return;
       Navigator.of(context).pop(); // close dialog
