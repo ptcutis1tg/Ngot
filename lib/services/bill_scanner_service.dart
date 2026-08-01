@@ -6,26 +6,55 @@ import '../models/transactionproflie.dart';
 
 class BillScannerService {
   static Future<TransactionProfile?> scanBill(File imageFile) async {
+    final geminiKey = dotenv.env['GEMINI_API_KEY'];
     final endpoint = dotenv.env['AI_API_ENDPOINT'];
-    if (endpoint == null || endpoint.isEmpty) {
-      throw Exception('Chưa cấu hình AI_API_ENDPOINT trong file .env. Vui lòng thêm biến này.');
+    
+    if ((geminiKey == null || geminiKey.isEmpty) && (endpoint == null || endpoint.isEmpty)) {
+      throw Exception('Chưa cấu hình GEMINI_API_KEY hoặc AI_API_ENDPOINT trong file .env.');
     }
 
     try {
       final bytes = await imageFile.readAsBytes();
       final base64Image = base64Encode(bytes);
+      
+      late http.Response response;
+      final prompt = 'Analyze this receipt and return a JSON object with: amount (number), time (ISO8601 format), title (string). Only output raw JSON.';
 
-      // Gửi POST request tới API
-      final response = await http.post(
-        Uri.parse(endpoint),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'image': base64Image,
-          'prompt': 'Analyze this receipt and return a JSON object with: amount (number), time (ISO8601 format), title (string). Only output raw JSON.',
-        }),
-      ).timeout(const Duration(seconds: 45));
+      if (geminiKey != null && geminiKey.isNotEmpty) {
+        // Gọi thẳng Gemini REST API
+        final geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$geminiKey';
+        response = await http.post(
+          Uri.parse(geminiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'contents': [
+              {
+                'parts': [
+                  {'text': prompt},
+                  {
+                    'inline_data': {
+                      'mime_type': 'image/jpeg',
+                      'data': base64Image
+                    }
+                  }
+                ]
+              }
+            ]
+          }),
+        ).timeout(const Duration(seconds: 45));
+      } else {
+        // Universal HTTP POST
+        response = await http.post(
+          Uri.parse(endpoint!),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'image': base64Image,
+            'prompt': prompt,
+          }),
+        ).timeout(const Duration(seconds: 45));
+      }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
