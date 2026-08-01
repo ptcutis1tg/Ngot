@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_application_1/debug.dart';
 import 'package:flutter_application_1/firstscreen/dashboard_screen.dart' deferred as dashboard;
 import 'package:flutter_application_1/firstscreen/settings_screen.dart' deferred as settings;
@@ -25,6 +27,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/services/sync_service.dart';
+import 'package:flutter_application_1/services/bill_scanner_service.dart';
 const bool resetAppData = false;
 const bool resetOnboardingFlowOnly = false;
 
@@ -300,6 +303,68 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
     );
   }
 
+  Future<void> _handleCameraScan(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    
+    if (pickedFile == null) return;
+    
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: Color(0xFF1CF07B)),
+                SizedBox(height: 16),
+                Text('Đang phân tích hóa đơn...', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      final file = File(pickedFile.path);
+      final tx = await BillScannerService.scanBill(file);
+      
+      if (!mounted) return;
+      Navigator.of(context).pop(); // close dialog
+      
+      if (tx != null) {
+        context.read<TransactionProvider>().addTransaction(tx);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Thêm giao dịch thành công!')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // close dialog
+      
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Lỗi'),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('Đóng'),
+            )
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final languageCode = context.watch<AppSettingsProvider>().languageCode;
@@ -368,29 +433,43 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: RawMaterialButton(
-        onPressed: () {
-          showDialog<void>(
-            context: context,
-            barrierDismissible: true,
-            builder: (dialogContext) => Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: EdgeInsets.zero,
-              elevation: 0,
-              child: AddTransactionWidget(
-                onAdd: (TransactionProfile tx) {
-                  context.read<TransactionProvider>().addTransaction(tx);
-                },
-                onClose: () => Navigator.of(dialogContext).pop(),
-              ),
-            ),
-          );
-        },
-        fillColor: const Color(0xFF1CF07B),
-        shape: const CircleBorder(),
-        elevation: 8,
-        constraints: const BoxConstraints.tightFor(width: 78, height: 78),
-        child: const Icon(Icons.add, size: 44, color: Color(0xFF002A17)),
+      floatingActionButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RawMaterialButton(
+            onPressed: () {
+              showDialog<void>(
+                context: context,
+                barrierDismissible: true,
+                builder: (dialogContext) => Dialog(
+                  backgroundColor: Colors.transparent,
+                  insetPadding: EdgeInsets.zero,
+                  elevation: 0,
+                  child: AddTransactionWidget(
+                    onAdd: (TransactionProfile tx) {
+                      context.read<TransactionProvider>().addTransaction(tx);
+                    },
+                    onClose: () => Navigator.of(dialogContext).pop(),
+                  ),
+                ),
+              );
+            },
+            fillColor: const Color(0xFF1CF07B),
+            shape: const CircleBorder(),
+            elevation: 8,
+            constraints: const BoxConstraints.tightFor(width: 64, height: 64),
+            child: const Icon(Icons.add, size: 36, color: Color(0xFF002A17)),
+          ),
+          const SizedBox(width: 12),
+          RawMaterialButton(
+            onPressed: () => _handleCameraScan(context),
+            fillColor: const Color(0xFF1CF07B),
+            shape: const CircleBorder(),
+            elevation: 8,
+            constraints: const BoxConstraints.tightFor(width: 54, height: 54),
+            child: const Icon(Icons.camera_alt, size: 28, color: Color(0xFF002A17)),
+          ),
+        ],
       ),
     );
   }
