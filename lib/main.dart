@@ -303,7 +303,7 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
     );
   }
 
-  Future<void> _handleCameraScan(BuildContext context) async {
+  Future<void> _handleCameraScan() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     
@@ -462,7 +462,7 @@ class _MainNavigationBodyState extends State<_MainNavigationBody> {
           ),
           const SizedBox(width: 12),
           RawMaterialButton(
-            onPressed: () => _handleCameraScan(context),
+            onPressed: () => _handleCameraScan(),
             fillColor: const Color(0xFF1CF07B),
             shape: const CircleBorder(),
             elevation: 8,
